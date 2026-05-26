@@ -114,28 +114,30 @@
             bottom: 14px;
             z-index: 10;
             display: grid;
-            gap: 8px;
-            max-width: min(560px, calc(100vw - 28px));
-            padding: 10px 12px;
-            border: 1px solid #303442;
-            border-left: 3px solid #ffaa66;
+            gap: 7px;
+            max-width: min(390px, calc(100vw - 28px));
+            max-height: min(30vh, 250px);
+            overflow: hidden;
+            padding: 9px 11px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-left: 2px solid rgba(255, 170, 102, 0.72);
             border-radius: 8px;
-            background: rgba(8, 9, 14, 0.82);
-            backdrop-filter: blur(8px);
-            font-size: 0.69rem;
+            background: rgba(8, 9, 14, 0.68);
+            backdrop-filter: blur(12px);
+            font-size: 0.64rem;
             pointer-events: none;
         }
 
         .legend-section {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px 12px;
+            gap: 5px 10px;
         }
 
         .legend-title {
             color: #ffd08a;
             font-weight: 700;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.03em;
             text-transform: uppercase;
         }
 
@@ -155,9 +157,9 @@
         }
 
         .legend-line {
-            width: 18px;
+            width: 16px;
             height: 0;
-            border-top: 2px solid var(--swatch);
+            border-top: 1px solid var(--swatch);
         }
 
         .legend-line.dashed {
@@ -173,9 +175,9 @@
             padding: 6px 10px;
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 8px;
-            background: rgba(8, 9, 14, 0.7);
+            background: rgba(8, 9, 14, 0.58);
             color: #d9d4e3;
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             font-family: Consolas, "Courier New", monospace;
             pointer-events: none;
         }
@@ -252,29 +254,29 @@
         };
 
         const relationTypes = {
-            identity: { label: "identidade", color: "#ff4d6d", dashes: [4, 4], width: 2.4 },
-            causality: { label: "causalidade", color: "rgba(255,255,255,0.4)", width: 2 },
-            manipulation: { label: "manipulação", color: "#9b5de5", dashes: [3, 5], width: 2.2 },
-            ritual: { label: "ritual", color: "#f15bb5", width: 2 },
-            temporal: { label: "temporal", color: "#b5179e", dashes: [8, 6], width: 2.4 },
-            tech: { label: "tecnologia/arma", color: "#fee440", width: 2 },
-            legacy: { label: "legado", color: "#83c5be", dashes: [6, 4], width: 2 },
-            sacrifice: { label: "sacrifício/motivação", color: "#00f5d4", width: 2.2 },
-            opposition: { label: "oposição/morte", color: "#ef233c", width: 2.5 },
-            pursuit: { label: "perseguição/rastro", color: "#fbb02d", dashes: [2, 4], width: 1.8 }
+            identity: { label: "identidade", color: "rgba(255,77,109,0.62)", dashes: [5, 7], width: 1.35 },
+            causality: { label: "causalidade", color: "rgba(210,214,235,0.28)", width: 1 },
+            manipulation: { label: "manipulação", color: "rgba(155,93,229,0.52)", dashes: [4, 7], width: 1.25 },
+            ritual: { label: "ritual", color: "rgba(241,91,181,0.54)", width: 1.15 },
+            temporal: { label: "temporal", color: "rgba(181,23,158,0.58)", dashes: [8, 8], width: 1.35 },
+            tech: { label: "tecnologia/arma", color: "rgba(254,228,64,0.55)", width: 1.15 },
+            legacy: { label: "legado", color: "rgba(131,197,190,0.52)", dashes: [6, 6], width: 1.1 },
+            sacrifice: { label: "sacrifício/motivação", color: "rgba(0,245,212,0.55)", width: 1.25 },
+            opposition: { label: "oposição/morte", color: "rgba(239,35,60,0.62)", width: 1.45 },
+            pursuit: { label: "perseguição/rastro", color: "rgba(251,176,45,0.54)", dashes: [3, 6], width: 1.05 }
         };
 
         const nodeDefaults = {
-            identity: { shape: "dot", size: 30, borderWidth: 3 },
-            elara:    { shape: "dot", size: 30, borderWidth: 3 },
-            arthur:   { shape: "dot", size: 28, borderWidth: 3 },
-            mara:     { shape: "dot", size: 28, borderWidth: 3 },
-            cult:     { shape: "icon", size: 24, iconCode: '\uf06e' },
-            ritual:   { shape: "icon", size: 24, iconCode: '\uf0d0' },
-            tech:     { shape: "icon", size: 22, iconCode: '\uf531' },
-            time:     { shape: "icon", size: 26, iconCode: '\uf1da' },
-            legacy:   { shape: "icon", size: 24, iconCode: '\uf556' },
-            other:    { shape: "dot", size: 20, borderWidth: 2 }
+            identity: { shape: "dot", size: 23, borderWidth: 2 },
+            elara:    { shape: "dot", size: 23, borderWidth: 2 },
+            arthur:   { shape: "dot", size: 21, borderWidth: 2 },
+            mara:     { shape: "dot", size: 21, borderWidth: 2 },
+            cult:     { shape: "icon", size: 18, iconCode: '\uf06e' },
+            ritual:   { shape: "icon", size: 18, iconCode: '\uf0d0' },
+            tech:     { shape: "icon", size: 17, iconCode: '\uf531' },
+            time:     { shape: "icon", size: 19, iconCode: '\uf1da' },
+            legacy:   { shape: "icon", size: 18, iconCode: '\uf556' },
+            other:    { shape: "dot", size: 16, borderWidth: 2 }
         };
 
         function node(id, label, group, title, overrides = {}) {
@@ -300,7 +302,7 @@
                     code: iconCode,
                     weight: "900",
                     color: baseColor,
-                    size: size * 2
+                    size: size * 1.55
                 };
             } else {
                 nodeObj.color = {
@@ -379,6 +381,82 @@
             node("bar_final", "Bar com Bia", "other", "Anos depois, a TV está sem estática. Elara venceu e protege uma normalidade à qual não pertence mais.", { shape: "icon", iconCode: "\uf000" })
         ];
 
+        const preferredPositions = {
+            // Linha de origem, governo e quarentena.
+            lorena: { x: -760, y: 240 },
+            julian: { x: -560, y: 20 },
+            separacao_lorena: { x: -760, y: 20 },
+            governo: { x: -940, y: -80 },
+            quarentena: { x: -1000, y: 120 },
+            cerco: { x: -760, y: -220 },
+            falsa_epidemia: { x: -980, y: 330 },
+            omega: { x: -700, y: 350 },
+            arma_sonica: { x: -560, y: -280 },
+
+            // Arthur, Mara e a zona de chantagem.
+            arthur: { x: -440, y: 115 },
+            emma: { x: -560, y: 300 },
+            predio_chips: { x: -500, y: -80 },
+            estase: { x: -380, y: 335 },
+            video_elara: { x: -220, y: 345 },
+            bunker_arthur: { x: -105, y: 120 },
+            mara: { x: -130, y: -25 },
+            aviso_mara: { x: -270, y: -195 },
+            mara_proposito: { x: -900, y: -360 },
+            bar_final: { x: -650, y: -450 },
+
+            // Núcleo Julian/Kael/Silas/Culto.
+            culto: { x: -280, y: 80 },
+            kael_jovem: { x: 95, y: -180 },
+            silas: { x: 100, y: 70 },
+            plano_vinganca: { x: -95, y: -95 },
+            hospital: { x: 360, y: -70 },
+            experimentos: { x: -330, y: -285 },
+            morte_lorena: { x: -260, y: 505 },
+            primeira_viagem: { x: 295, y: 505 },
+            loop_silas: { x: 410, y: 330 },
+            casa_campo: { x: 520, y: 150 },
+            linhas_independentes: { x: 610, y: 325 },
+            fogo_eterno: { x: 335, y: 165 },
+            quebra: { x: 205, y: 50 },
+            morte_silas: { x: 140, y: 225 },
+
+            // Elara, festa e fitas.
+            elara: { x: 160, y: -335 },
+            bia: { x: -440, y: -470 },
+            fita1: { x: -155, y: -505 },
+            fita2: { x: 100, y: -505 },
+            festa_elara: { x: 360, y: -455 },
+            ritual_remoto: { x: -165, y: -350 },
+            lideres_culto: { x: 5, y: -365 },
+            ruptura: { x: 445, y: -330 },
+            tuneis_culto: { x: -455, y: -175 },
+            tunel_silas: { x: 405, y: 40 },
+
+            // Laboratório, tecnologia e resolução.
+            quarto_panico: { x: 575, y: -330 },
+            lab: { x: 560, y: -145 },
+            armas_ads: { x: 700, y: 120 },
+            incendio_invisivel: { x: 880, y: -30 },
+            nucleo_frio: { x: 920, y: -260 },
+            hera: { x: 700, y: -35 },
+            morte_arthur: { x: 245, y: -60 },
+
+            // Legado e selo final.
+            mapa_ossos: { x: 120, y: 495 },
+            bio: { x: 5, y: 280 },
+            tv_anos90: { x: -385, y: 505 },
+            isca_cronal: { x: -30, y: -455 },
+            selo: { x: -360, y: -390 }
+        };
+
+        nodesData.forEach(item => {
+            const position = preferredPositions[item.id];
+            if (!position) return;
+            item.x = position.x;
+            item.y = position.y;
+        });
+
         let edgeSeq = 0;
         function edge(from, to, label, relation, overrides = {}) {
             const style = relationTypes[relation] || relationTypes.causality;
@@ -386,13 +464,14 @@
                 id: `edge_${++edgeSeq}`,
                 from,
                 to,
-                label,
+                label: overrides.showLabel ? label : "",
+                title: label,
                 relation,
                 arrows: overrides.arrows || "to",
                 color: overrides.color || { color: style.color, highlight: "#ffd08a" },
                 dashes: overrides.dashes !== undefined ? overrides.dashes : style.dashes,
                 width: overrides.width || style.width,
-                smooth: overrides.smooth || { type: "cubicBezier", roundness: 0.35 }
+                smooth: overrides.smooth || { type: "curvedCW", roundness: 0.16 }
             };
         }
 
@@ -551,11 +630,11 @@
         }
 
         function renderFallbackGraph(reason) {
-            const width = 1600;
-            const height = 1000;
+            const width = 1800;
+            const height = 1080;
             const cx = width / 2;
             const cy = height / 2;
-            const radius = 390;
+            const radius = 470;
             const activeGroups = new Set(
                 Array.from(document.querySelectorAll("#filterGroup input"))
                     .filter(cb => cb.checked)
@@ -567,6 +646,14 @@
 
             const positions = {};
             visibleNodes.forEach((item, index) => {
+                const preferred = preferredPositions[item.id];
+                if (preferred) {
+                    positions[item.id] = {
+                        x: cx + preferred.x * 0.74,
+                        y: cy + preferred.y * 0.76
+                    };
+                    return;
+                }
                 const angle = (Math.PI * 2 * index / Math.max(visibleNodes.length, 1)) - Math.PI / 2;
                 positions[item.id] = {
                     x: cx + Math.cos(angle) * radius,
@@ -616,8 +703,8 @@
                 line.setAttribute("x2", to.x);
                 line.setAttribute("y2", to.y);
                 line.setAttribute("stroke", edgeColorForFallback(item));
-                line.setAttribute("stroke-width", item.width || "1.5");
-                line.setAttribute("stroke-opacity", "0.66");
+                line.setAttribute("stroke-width", item.width || "1");
+                line.setAttribute("stroke-opacity", "0.42");
                 if (item.dashes) line.setAttribute("stroke-dasharray", Array.isArray(item.dashes) ? item.dashes.join(" ") : "7 7");
                 line.setAttribute("marker-end", "url(#fallback-arrow)");
                 svg.appendChild(line);
@@ -655,10 +742,13 @@
                     shape.setAttribute("r", item.size || 24);
                 }
 
-                shape.setAttribute("fill", item.color || groups[item.group].color);
-                shape.setAttribute("stroke", "#ffffff");
-                shape.setAttribute("stroke-width", "1.5");
-                shape.setAttribute("opacity", "0.92");
+                const fallbackFill = item.color && typeof item.color === "object"
+                    ? item.color.background || groups[item.group].color
+                    : item.color || groups[item.group].color;
+                shape.setAttribute("fill", fallbackFill);
+                shape.setAttribute("stroke", "rgba(255,255,255,0.8)");
+                shape.setAttribute("stroke-width", "1");
+                shape.setAttribute("opacity", "0.9");
                 group.appendChild(shape);
 
                 const title = document.createElementNS(svgNS, "title");
@@ -667,10 +757,10 @@
 
                 const text = document.createElementNS(svgNS, "text");
                 text.setAttribute("x", pos.x);
-                text.setAttribute("y", pos.y + 64);
+                text.setAttribute("y", pos.y + 48);
                 text.setAttribute("text-anchor", "middle");
                 text.setAttribute("fill", "#ffffff");
-                text.setAttribute("font-size", "13");
+                text.setAttribute("font-size", "11");
                 text.setAttribute("font-family", "Segoe UI, Arial, sans-serif");
                 text.textContent = item.label;
                 group.appendChild(text);
@@ -698,32 +788,39 @@
 
         const options = {
             nodes: {
-                font: { size: 12, color: "#ffffff", face: "Inter, 'Segoe UI', sans-serif", strokeWidth: 0 },
-                borderWidth: 3,
-                shadow: { enabled: true, color: "rgba(0,0,0,0.6)", size: 10, x: 0, y: 3 },
-                margin: 8
+                font: {
+                    size: 10,
+                    color: "rgba(255,255,255,0.88)",
+                    face: "Inter, 'Segoe UI', sans-serif",
+                    strokeWidth: 3,
+                    strokeColor: "rgba(12,13,19,0.86)"
+                },
+                borderWidth: 2,
+                shadow: { enabled: true, color: "rgba(0,0,0,0.38)", size: 5, x: 0, y: 2 },
+                margin: 5
             },
             edges: {
-                arrows: { to: { enabled: true, scaleFactor: 0.8 } },
-                smooth: { type: "continuous", roundness: 0.4 },
-                font: { size: 9, color: "#eeeeee", align: "middle", strokeWidth: 0, face: "Inter, sans-serif" },
-                color: { color: "rgba(180, 180, 220, 0.4)", highlight: "#ffffff" },
-                selectionWidth: 3,
-                shadow: { enabled: true, color: "rgba(0,0,0,0.5)", size: 5, x: 0, y: 2 }
+                arrows: { to: { enabled: true, scaleFactor: 0.42 } },
+                smooth: { type: "dynamic", roundness: 0.14 },
+                font: { size: 0, color: "rgba(255,255,255,0)", strokeWidth: 0, face: "Inter, sans-serif" },
+                color: { color: "rgba(180, 185, 215, 0.24)", highlight: "#ffd08a", hover: "#ffffff" },
+                hoverWidth: 0.25,
+                selectionWidth: 1.4,
+                shadow: false
             },
             physics: {
-                enabled: true,
-                stabilization: { iterations: 180, fit: true },
+                enabled: false,
+                stabilization: { iterations: 260, fit: true },
                 solver: "forceAtlas2Based",
                 forceAtlas2Based: {
-                    gravitationalConstant: -78,
-                    centralGravity: 0.012,
-                    springLength: 160,
-                    springConstant: 0.055,
-                    damping: 0.45,
-                    avoidOverlap: 0.75
+                    gravitationalConstant: -155,
+                    centralGravity: 0.006,
+                    springLength: 250,
+                    springConstant: 0.035,
+                    damping: 0.58,
+                    avoidOverlap: 1
                 },
-                minVelocity: 0.8
+                minVelocity: 0.55
             },
             interaction: {
                 hover: true,
@@ -733,7 +830,7 @@
                 multiselect: false,
                 navigationButtons: false
             },
-            layout: { randomSeed: 42, improvedLayout: true }
+            layout: { randomSeed: 42, improvedLayout: false }
         };
 
         let network;
@@ -747,10 +844,15 @@
         }
 
         network.once("stabilizationIterationsDone", () => {
+            network.setOptions({ physics: false });
             network.fit({ animation: true });
             status.textContent = "Grafo pronto. Clique em um nó para destacar identidade, causa, ritual, tempo, tecnologia e legado.";
         });
-        setTimeout(() => network.fit({ animation: true }), 900);
+        setTimeout(() => {
+            network.setOptions({ physics: false });
+            network.fit({ animation: true });
+            status.textContent = "Grafo pronto. Clique em um nó para destacar identidade, causa, ritual, tempo, tecnologia e legado.";
+        }, 1200);
 
         let originalNodeColors = {};
         let originalEdgeColors = {};
@@ -813,9 +915,9 @@
 
             const updatedEdges = allEdges.map(e => {
                 if (connectedEdges.includes(e.id)) {
-                    return { id: e.id, opacity: 1, color: { color: "#ffffff", highlight: "#ffffff" }, width: 3 };
+                    return { id: e.id, opacity: 1, color: { color: "#ffffff", highlight: "#ffffff" }, width: 2.1 };
                 } else {
-                    return { id: e.id, opacity: 0.05 };
+                    return { id: e.id, opacity: 0.035 };
                 }
             });
 
