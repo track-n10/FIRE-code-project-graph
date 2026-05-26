@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafo Interativo - O Caos, o Ritual e o Selo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #111118;
+            color: #f0f0f0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #header {
+            z-index: 20;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 10px 18px;
+            background: #090a12;
+            border-bottom: 1px solid #282b3a;
+        }
+
+        h1 {
+            font-size: 1.05rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #ffd08a;
+        }
+
+        .header-tools {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filters {
+            display: flex;
+            gap: 8px 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            max-width: 860px;
+            padding: 7px 12px;
+            border: 1px solid #303344;
+            border-radius: 8px;
+            background: #171923;
+            font-size: 0.72rem;
+        }
+
+        .filters label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        button {
+            min-height: 31px;
+            padding: 0 11px;
+            border: 1px solid #35394a;
+            border-radius: 6px;
+            background: #202331;
+            color: #fff6e8;
+            font: inherit;
+            font-size: 0.78rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            border-color: #ffaa66;
+        }
+
+        #graph-container {
+            flex: 1;
+            width: 100%;
+            min-height: 0;
+            position: relative;
+            overflow: hidden;
+            background: #101118;
+        }
+
+        #graph-container svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #legend {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            z-index: 10;
+            display: grid;
+            gap: 8px;
+            max-width: min(560px, calc(100vw - 28px));
+            padding: 10px 12px;
+            border: 1px solid #303442;
+            border-left: 3px solid #ffaa66;
+            border-radius: 8px;
+            background: rgba(8, 9, 14, 0.82);
+            backdrop-filter: blur(8px);
+            font-size: 0.69rem;
+            pointer-events: none;
+        }
+
+        .legend-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+        }
+
+        .legend-title {
+            color: #ffd08a;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #d9d4e3;
+            white-space: nowrap;
+        }
+
+        .legend-swatch {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: var(--swatch);
+        }
+
+        .legend-line {
+            width: 18px;
+            height: 0;
+            border-top: 2px solid var(--swatch);
+        }
+
+        .legend-line.dashed {
+            border-top-style: dashed;
+        }
+
+        .status {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            z-index: 10;
+            max-width: min(720px, calc(100vw - 28px));
+            padding: 6px 10px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            background: rgba(8, 9, 14, 0.7);
+            color: #d9d4e3;
+            font-size: 0.72rem;
+            font-family: Consolas, "Courier New", monospace;
+            pointer-events: none;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                overflow: auto;
+            }
+
+            #header {
+                align-items: flex-start;
+            }
+
+            h1 {
+                font-size: 0.95rem;
+            }
+
+            .filters {
+                max-width: 100%;
+            }
+
+            #legend {
+                position: static;
+                max-width: none;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .status {
+                position: static;
+                max-width: none;
+                border-radius: 0;
+            }
+        }
+    </style>
+    <script src="https://unpkg.com/vis-network@9.1.6/dist/vis-network.min.js"></script>
+</head>
+<body>
+<div id="header">
+    <h1>Grafo da história | Caos, Ritual e Selo</h1>
+    <div class="header-tools">
+        <div class="filters" id="filterGroup"></div>
+        <div class="controls">
+            <button id="fitBtn" type="button">Centralizar</button>
+            <button id="disablePhysics" type="button">Travar física</button>
+            <button id="enablePhysics" type="button">Ativar física</button>
+        </div>
+    </div>
+</div>
+
+<div id="graph-container"></div>
+<div id="legend"></div>
+<div class="status" id="status">Clique em um nó para destacar suas conexões narrativas.</div>
+
+<script>
+    (function() {
+        const container = document.getElementById("graph-container");
+        const filterGroup = document.getElementById("filterGroup");
+        const legend = document.getElementById("legend");
+        const status = document.getElementById("status");
+        if (!container || !filterGroup || !legend || !status) return;
+
+        const groups = {
+            identity: { label: "Julian / Kael / Silas", color: "#ff6666" },
+            elara: { label: "Elara / Hera", color: "#66ccff" },
+            arthur: { label: "Arthur / Governo", color: "#ffaa44" },
+            mara: { label: "Mara", color: "#ff7a8a" },
+            cult: { label: "Culto / Sistema", color: "#88ff88" },
+            ritual: { label: "Ritual", color: "#54e0c2" },
+            tech: { label: "Tecnologia / Armas", color: "#ffd166" },
+            time: { label: "Linhas temporais", color: "#cc99ff" },
+            legacy: { label: "Legado / Selo", color: "#aab6c8" },
+            other: { label: "Outros", color: "#b8b8b8" }
+        };
+
+        const relationTypes = {
+            identity: { label: "identidade", color: "#ff6666", dashes: [4, 4], width: 2.4 },
+            causality: { label: "causalidade", color: "#88ff88", width: 2 },
+            manipulation: { label: "manipulação", color: "#ff66aa", dashes: [3, 5], width: 2 },
+            ritual: { label: "ritual", color: "#54e0c2", width: 2 },
+            temporal: { label: "temporal", color: "#cc99ff", dashes: [8, 6], width: 2.4 },
+            tech: { label: "tecnologia/arma", color: "#ffd166", width: 2 },
+            legacy: { label: "legado", color: "#aab6c8", dashes: [6, 4], width: 2 },
+            sacrifice: { label: "sacrifício/motivação", color: "#66ccff", width: 2.2 },
+            opposition: { label: "oposição/morte", color: "#ff4d4d", width: 2.5 },
+            pursuit: { label: "perseguição/rastro", color: "#ffaa44", dashes: [2, 4], width: 1.8 }
+        };
+
+        const nodeDefaults = {
+            identity: { shape: "dot", size: 28 },
+            elara: { shape: "dot", size: 28 },
+            arthur: { shape: "dot", size: 26 },
+            mara: { shape: "dot", size: 26 },
+            cult: { shape: "box", size: 22 },
+            ritual: { shape: "diamond", size: 22 },
+            tech: { shape: "box", size: 21 },
+            time: { shape: "diamond", size: 24 },
+            legacy: { shape: "box", size: 22 },
+            other: { shape: "dot", size: 20 }
+        };
+
+        function node(id, label, group, title, overrides = {}) {
+            const defaults = nodeDefaults[group] || nodeDefaults.other;
+            return {
+                id,
+                label,
+                group,
+                type: group,
+                shape: overrides.shape || defaults.shape,
+                size: overrides.size || defaults.size,
+                color: overrides.color || groups[group].color,
+                title: `<b>${label}</b><br>${title}`
+            };
+        }
+
+        const nodesData = [
+            node("julian", "Julian", "identity", "Nome verdadeiro do personagem. É separado de Lorena e entregue ao circuito do governo/culto."),
+            node("lorena", "Lorena", "identity", "Mãe de Julian. Sua morte é o trauma que desperta o fogo e a primeira viagem temporal.", { size: 20 }),
+            node("kael_jovem", "Kael jovem", "identity", "Julian rebatizado pelo culto. Escapa da casa em chamas, infiltra-se na festa e é manipulado por Silas."),
+            node("silas", "Silas / Julian adulto", "identity", "Julian/Kael adulto usando identidade de agente infiltrado no culto. Manipula eventos e deixa o plano de contingência."),
+
+            node("elara", "Elara", "elara", "Descobre as fitas, resiste ao ritual remoto, mata Arthur, quebra o ciclo e depois assume o fardo de Mara."),
+            node("hera", "Hera", "elara", "Versão velha/futura de Elara. Revela o núcleo frio e se sacrifica para empurrar Elara de volta ao laboratório."),
+            node("bia", "Bia", "other", "Amiga de Elara. Encontra a primeira fita e reaparece na cena final como símbolo da normalidade protegida."),
+
+            node("arthur", "Arthur Vane", "arthur", "Agente do governo e pai de Elara. Usa a epidemia falsa como pretexto e tenta apagar evidências biológicas."),
+            node("governo", "Governo / agentes", "arthur", "Rede operacional que trafica Julian, sustenta a quarentena e aciona forças militares.", { shape: "box", size: 22 }),
+            node("emma", "Emma", "arthur", "Esposa falecida de Arthur. Possível anjo/cobaia; seus objetos viram gatilhos psicológicos contra Arthur.", { size: 20 }),
+
+            node("mara", "Mara", "mara", "Sabota rádios, usa túneis do culto, manipula Arthur e Elara, mata Silas e tenta levar Kael ao Fogo Eterno."),
+            node("mara_proposito", "Mara com propósito", "legacy", "Identidade que Elara assume depois do selo: mito urbano e erro no sistema que caça o governo por anos."),
+
+            node("culto", "Culto", "cult", "Estrutura que sequestra Julian, rebatiza-o como Kael, realiza experimentos e opera túneis, rituais e sinalizadores."),
+            node("lideres_culto", "Líderes do Culto", "cult", "Alvos atraídos pela isca cronal de Elara e incinerados durante o plano de extermínio."),
+            node("tuneis_culto", "Túneis do Culto", "cult", "Rede subterrânea usada por Mara para se deslocar e por Kael/Silas no reencontro final."),
+            node("tunel_silas", "Reencontro no túnel", "cult", "Kael e Silas se encontram sob efeito das armas térmicas enquanto Mara arma a execução.", { shape: "box", size: 22 }),
+
+            node("separacao_lorena", "Separação de Lorena", "ritual", "Julian é separado da mãe no centro de detenção e entregue aos agentes.", { shape: "box" }),
+            node("experimentos", "Experimentos em Kael", "ritual", "O culto tenta despertar poderes em Julian/Kael por meio de ritual e violência."),
+            node("morte_lorena", "Morte de Lorena", "ritual", "Morte da mãe diante de Kael. Dispara o fogo e o primeiro salto temporal.", { shape: "triangle", color: "#ff8888", size: 24 }),
+            node("omega", "Frequência Ômega", "tech", "Sabotagem de rádio de Mara que causa náuseas coletivas e pânico público."),
+            node("falsa_epidemia", "Falsa epidemia", "cult", "Narrativa pública criada pelo pânico da Frequência Ômega e usada como cobertura para a quarentena."),
+            node("quarentena", "Quarentena", "arthur", "Pretexto de Arthur para isolamento, cerco e controle da casa de Elara.", { shape: "box", size: 22 }),
+            node("predio_chips", "Prédio incendiado / chips", "mara", "Mara incendeia um prédio e deixa corpo com chips de agentes como rastro e provocação.", { shape: "box", size: 22 }),
+            node("festa_elara", "Festa de Elara", "elara", "Ambiente onde Kael observa Elara e Bia, tentando se aproximar.", { shape: "box", size: 22 }),
+            node("hospital", "Hospital", "identity", "Flashback/paralelo em que Kael pesquisa rituais e recebe a visita de Silas.", { shape: "box", size: 22 }),
+            node("fita1", "Fita Lua de Mel", "ritual", "Bia encontra a fita de Arthur e Emma; Elara descobre o primeiro nível do ritual."),
+            node("plano_vinganca", "Plano de Silas", "identity", "Silas orienta Kael a usar Elara para chegar até Arthur e admite que Mara observa tudo.", { shape: "box", size: 22 }),
+            node("estase", "Esculturas de Estase", "mara", "Mortes encenadas por Mara como paródia das fitas VHS, usando objetos de Emma para destruir Arthur.", { shape: "box", size: 22 }),
+            node("aviso_mara", "Aviso de Mara a Elara", "mara", "Mara antecipa que Kael se aproximará de Elara, contaminando a confiança entre eles.", { shape: "box", size: 22 }),
+            node("fita2", "Fita FASE 2", "ritual", "Entregue pela portinha do gato. Elara e Kael passam mal e a ruptura emocional começa."),
+            node("ruptura", "Ruptura na festa", "elara", "Elara percebe ligação de Kael com o culto, expulsa convidados e o mantém sob mira de arma.", { shape: "star", color: "#ff88aa", size: 26 }),
+            node("video_elara", "Vídeo de Elara dormindo", "mara", "Mara grava Elara dentro da casa e envia a Arthur, provocando pânico e cerco total.", { shape: "box", size: 22 }),
+            node("cerco", "Cerco militar", "arthur", "Polícia, exército, helicópteros e isolamento plástico cercam a casa como zona de contaminação.", { shape: "box", size: 23 }),
+            node("arma_sonica", "Arma sônica", "tech", "Líquidos tremem, luz vermelha invade a casa, todos desmaiam e a energia acaba."),
+            node("ritual_remoto", "Ritual remoto em Elara", "ritual", "Elara flutua em transe diante de feixe laranja e nomes projetados por microfones."),
+            node("quarto_panico", "Quarto do pânico / saída", "tech", "Elara lembra da possível saída subterrânea escondida na casa.", { shape: "box", size: 20 }),
+            node("lab", "Laboratório subterrâneo", "cult", "Laboratório sob a casa de Elara. Ponto de controle das armas, rastreadores e bunker."),
+            node("armas_ads", "Armas térmicas / ADS", "tech", "Energia de calor direcionada usada no cerco, derretendo plástico e bloqueando saídas."),
+            node("incendio_invisivel", "Incêndio invisível", "tech", "Calor letal no ar, sem chama aparente, que transforma a casa em zona de morte."),
+            node("nucleo_frio", "Núcleo frio", "tech", "Área resfriada por nitrogênio que Hera revela ser o único refúgio seguro.", { shape: "box", size: 20 }),
+            node("bunker_arthur", "Bunker de Arthur", "arthur", "Câmara blindada e isolada onde Arthur assiste à limpeza militar achando-se intocável.", { shape: "box", size: 22 }),
+            node("morte_arthur", "Morte de Arthur", "arthur", "Elara inverte o sistema de resfriamento e redireciona o calor para a câmara de Arthur.", { shape: "triangle", color: "#ff8888", size: 25 }),
+            node("morte_silas", "Morte de Silas", "mara", "Mara atira no peito de Silas diante de Kael, ativando o plano de contingência dele.", { shape: "triangle", color: "#ff8888", size: 25 }),
+            node("fogo_eterno", "Fogo Eterno", "time", "Local onde Mara tenta levar Kael para apagar a existência dele e purificar a linha."),
+            node("quebra", "Quebra do ciclo", "time", "Elara atira em Mara e depois em Kael antes da entrada no Fogo Eterno.", { shape: "star", color: "#ff88aa", size: 28 }),
+
+            node("primeira_viagem", "Primeira viagem temporal", "time", "Kael viaja para o passado após a morte de Lorena, tentando impedir Arthur."),
+            node("loop_silas", "Loop de Silas", "time", "Silas reinicia no momento da morte de Lorena após matar Arthur em outra linha."),
+            node("casa_campo", "Casa de campo em chamas", "time", "Local recorrente onde linhas se cruzam e Silas encontra Elara/Hera saindo das chamas."),
+            node("linhas_independentes", "Linhas independentes", "time", "Regra percebida por Silas: linhas coexistem e se cruzam, sem apagar totalmente umas às outras."),
+
+            node("mapa_ossos", "Mapa no centro", "legacy", "Mensagem no corpo de Silas leva Elara aos códigos gravados no esqueleto."),
+            node("bio", "Bio-transmissor", "legacy", "Vértebra sintética contendo banco de dados roubado da rede mundial do culto."),
+            node("tv_anos90", "TV dos anos 90", "tech", "Objeto de família que vira interface para acessar a rede do culto pelo bio-transmissor."),
+            node("isca_cronal", "Isca cronal", "legacy", "Elara hackeia sinalizadores e cria incêndios de baixa intensidade para atrair líderes do culto."),
+            node("selo", "Selo dimensional", "legacy", "Pulso final que estica a realidade e sela esta dimensão contra novos viajantes temporais."),
+            node("bar_final", "Bar com Bia", "other", "Anos depois, a TV está sem estática. Elara venceu e protege uma normalidade à qual não pertence mais.")
+        ];
+
+        let edgeSeq = 0;
+        function edge(from, to, label, relation, overrides = {}) {
+            const style = relationTypes[relation] || relationTypes.causality;
+            return {
+                id: `edge_${++edgeSeq}`,
+                from,
+                to,
+                label,
+                relation,
+                arrows: overrides.arrows || "to",
+                color: overrides.color || { color: style.color, highlight: "#ffd08a" },
+                dashes: overrides.dashes !== undefined ? overrides.dashes : style.dashes,
+                width: overrides.width || style.width,
+                smooth: overrides.smooth || { type: "cubicBezier", roundness: 0.35 }
+            };
+        }
+
+        const edgesData = [
+            edge("julian", "separacao_lorena", "separado da mãe", "causality"),
+            edge("lorena", "separacao_lorena", "perde o filho", "causality"),
+            edge("separacao_lorena", "governo", "tráfico de criança", "opposition"),
+            edge("governo", "culto", "entrega ao sistema", "causality"),
+            edge("culto", "julian", "rebatiza", "identity"),
+            edge("julian", "kael_jovem", "vira Kael", "identity"),
+            edge("culto", "experimentos", "submete ao ritual", "ritual"),
+            edge("experimentos", "kael_jovem", "desperta poderes", "ritual"),
+            edge("culto", "morte_lorena", "mata Lorena", "opposition"),
+            edge("lorena", "morte_lorena", "trauma", "sacrifice"),
+            edge("morte_lorena", "primeira_viagem", "ativa fogo", "temporal"),
+            edge("primeira_viagem", "loop_silas", "origem do loop", "temporal"),
+            edge("kael_jovem", "silas", "adulto infiltrado", "identity", { arrows: "to;from" }),
+            edge("silas", "culto", "infiltra-se", "manipulation"),
+            edge("silas", "arthur", "trabalha perto", "pursuit"),
+            edge("emma", "culto", "possível anjo/cobaia", "ritual"),
+            edge("arthur", "emma", "luto e culpa", "causality"),
+
+            edge("mara", "omega", "sabota rádios", "tech"),
+            edge("omega", "falsa_epidemia", "gera pânico", "causality"),
+            edge("falsa_epidemia", "quarentena", "pretexto público", "causality"),
+            edge("arthur", "quarentena", "impõe controle", "causality"),
+            edge("governo", "quarentena", "sustenta operação", "causality"),
+            edge("arthur", "mara", "rastreia terrorista", "pursuit"),
+            edge("silas", "mara", "sabe que observa", "pursuit"),
+            edge("mara", "predio_chips", "incendeia e deixa chips", "opposition"),
+            edge("predio_chips", "governo", "expõe agentes", "pursuit"),
+            edge("mara", "tuneis_culto", "usa para sumir", "pursuit"),
+            edge("culto", "tuneis_culto", "estrutura subterrânea", "causality"),
+
+            edge("kael_jovem", "festa_elara", "entra pelos fundos", "manipulation"),
+            edge("festa_elara", "elara", "aproximação", "causality"),
+            edge("bia", "fita1", "encontra", "causality"),
+            edge("fita1", "elara", "revela ritual", "ritual"),
+            edge("hospital", "kael_jovem", "pesquisa rituais", "causality"),
+            edge("silas", "hospital", "visita Kael", "temporal"),
+            edge("silas", "plano_vinganca", "explica missão", "manipulation"),
+            edge("plano_vinganca", "kael_jovem", "usar Elara", "manipulation"),
+            edge("plano_vinganca", "arthur", "chegar ao alvo", "opposition"),
+            edge("mara", "aviso_mara", "antecipa Kael", "manipulation"),
+            edge("aviso_mara", "elara", "contamina confiança", "manipulation"),
+            edge("mara", "estase", "encena mortes", "manipulation"),
+            edge("emma", "estase", "objetos como gatilho", "manipulation"),
+            edge("estase", "arthur", "paranoia", "manipulation"),
+            edge("fita1", "fita2", "fase seguinte", "ritual"),
+            edge("fita2", "elara", "passa mal", "ritual"),
+            edge("fita2", "kael_jovem", "passa mal", "ritual"),
+            edge("fita2", "ruptura", "quebra a festa", "causality"),
+            edge("ruptura", "kael_jovem", "sob mira de arma", "opposition"),
+            edge("mara", "video_elara", "grava dentro da casa", "manipulation"),
+            edge("video_elara", "arthur", "pânico de proteção", "manipulation"),
+            edge("arthur", "cerco", "ordena cerco total", "causality"),
+            edge("quarentena", "cerco", "isolamento plástico", "causality"),
+            edge("cerco", "arma_sonica", "ativa ataque", "tech"),
+            edge("arma_sonica", "ritual_remoto", "abre transe", "ritual"),
+            edge("ritual_remoto", "elara", "tentam iniciar à distância", "ritual"),
+            edge("kael_jovem", "ritual_remoto", "puxa Elara de volta", "sacrifice"),
+            edge("elara", "quarto_panico", "procura saída", "causality"),
+            edge("quarto_panico", "lab", "leva aos subterrâneos", "causality"),
+
+            edge("lab", "tunel_silas", "conecta ao túnel", "causality"),
+            edge("kael_jovem", "tunel_silas", "reencontra adulto", "temporal"),
+            edge("silas", "tunel_silas", "mesmo corpo futuro", "temporal"),
+            edge("mara", "tunel_silas", "arma a emboscada", "manipulation"),
+            edge("silas", "lab", "guia Elara por telefone", "tech"),
+            edge("elara", "lab", "desliga sistemas", "tech"),
+            edge("lab", "armas_ads", "controla calor/rastreadores", "tech"),
+            edge("armas_ads", "incendio_invisivel", "derrete plástico", "tech"),
+            edge("incendio_invisivel", "hera", "força revelação", "causality"),
+            edge("hera", "nucleo_frio", "revela refúgio", "sacrifice"),
+            edge("hera", "elara", "sacrifício motiva", "sacrifice"),
+            edge("nucleo_frio", "lab", "último lugar seguro", "tech"),
+            edge("arthur", "bunker_arthur", "se protege", "tech"),
+            edge("bunker_arthur", "morte_arthur", "vira pira tecnológica", "opposition"),
+            edge("elara", "morte_arthur", "inverte resfriamento", "opposition"),
+            edge("mara", "morte_silas", "executa Silas", "opposition"),
+            edge("morte_silas", "kael_jovem", "trauma diante dele", "opposition"),
+            edge("morte_silas", "mapa_ossos", "ativa contingência", "legacy"),
+            edge("mara", "fogo_eterno", "leva Kael", "temporal"),
+            edge("fogo_eterno", "kael_jovem", "tentativa de apagar", "opposition"),
+            edge("elara", "quebra", "decide romper", "temporal"),
+            edge("quebra", "mara", "atira antes do fogo", "opposition"),
+            edge("quebra", "kael_jovem", "atira antes do fogo", "opposition"),
+            edge("quebra", "fogo_eterno", "impede entrada", "temporal"),
+
+            edge("silas", "loop_silas", "reinicia após matar Arthur", "temporal"),
+            edge("loop_silas", "casa_campo", "observa incêndio repetir", "temporal"),
+            edge("casa_campo", "hera", "sai das chamas", "temporal"),
+            edge("hera", "linhas_independentes", "prova viva", "temporal"),
+            edge("silas", "linhas_independentes", "deduz regra", "temporal"),
+            edge("linhas_independentes", "primeira_viagem", "linhas coexistem", "temporal"),
+            edge("casa_campo", "fogo_eterno", "fogo como portal", "temporal"),
+
+            edge("mapa_ossos", "bio", "códigos no esqueleto", "legacy"),
+            edge("silas", "bio", "vértebra sintética", "legacy"),
+            edge("bio", "tv_anos90", "interface física", "tech"),
+            edge("tv_anos90", "culto", "acesso à rede", "tech"),
+            edge("bio", "isca_cronal", "hackeia sinalizadores", "legacy"),
+            edge("isca_cronal", "lideres_culto", "atrai para armadilha", "manipulation"),
+            edge("elara", "isca_cronal", "executa plano", "legacy"),
+            edge("lideres_culto", "selo", "incineração final", "opposition"),
+            edge("isca_cronal", "selo", "prepara pulso", "legacy"),
+            edge("elara", "selo", "sela dimensão", "legacy"),
+            edge("selo", "mara_proposito", "fardo assumido", "legacy"),
+            edge("mara_proposito", "governo", "caça por anos", "opposition"),
+            edge("mara_proposito", "bar_final", "normalidade protegida", "legacy"),
+            edge("bia", "bar_final", "reencontro", "causality"),
+            edge("selo", "bar_final", "mundo sem estática", "legacy")
+        ];
+
+        const missingNodeIds = new Set();
+        const nodeIds = new Set(nodesData.map(item => item.id));
+        edgesData.forEach(item => {
+            if (!nodeIds.has(item.from)) missingNodeIds.add(item.from);
+            if (!nodeIds.has(item.to)) missingNodeIds.add(item.to);
+        });
+        if (missingNodeIds.size > 0) {
+            console.warn("Nós ausentes no grafo:", Array.from(missingNodeIds));
+        }
+
+        function renderFilters() {
+            filterGroup.innerHTML = Object.entries(groups).map(([id, group]) => `
+                <label><input type="checkbox" value="${id}" checked> ${group.label}</label>
+            `).join("");
+        }
+
+        function renderLegend() {
+            const nodeLegend = Object.values(groups).map(group => `
+                <span class="legend-item"><span class="legend-swatch" style="--swatch:${group.color}"></span>${group.label}</span>
+            `).join("");
+
+            const edgeLegend = Object.values(relationTypes).map(type => `
+                <span class="legend-item"><span class="legend-line ${type.dashes ? "dashed" : ""}" style="--swatch:${type.color}"></span>${type.label}</span>
+            `).join("");
+
+            legend.innerHTML = `
+                <div class="legend-title">Nós</div>
+                <div class="legend-section">${nodeLegend}</div>
+                <div class="legend-title">Conexões</div>
+                <div class="legend-section">${edgeLegend}</div>
+            `;
+        }
+
+        renderFilters();
+        renderLegend();
+
+        function edgeColorForFallback(item) {
+            if (typeof item.color === "string") return item.color;
+            if (item.color && item.color.color) return item.color.color;
+            const style = relationTypes[item.relation] || relationTypes.causality;
+            return style.color;
+        }
+
+        function renderFallbackGraph(reason) {
+            const width = 1600;
+            const height = 1000;
+            const cx = width / 2;
+            const cy = height / 2;
+            const radius = 390;
+            const activeGroups = new Set(
+                Array.from(document.querySelectorAll("#filterGroup input"))
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value)
+            );
+            const visibleNodes = nodesData.filter(item => activeGroups.has(item.group));
+            const visibleIds = new Set(visibleNodes.map(item => item.id));
+            const visibleEdges = edgesData.filter(item => visibleIds.has(item.from) && visibleIds.has(item.to));
+
+            const positions = {};
+            visibleNodes.forEach((item, index) => {
+                const angle = (Math.PI * 2 * index / Math.max(visibleNodes.length, 1)) - Math.PI / 2;
+                positions[item.id] = {
+                    x: cx + Math.cos(angle) * radius,
+                    y: cy + Math.sin(angle) * radius
+                };
+            });
+
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+            svg.setAttribute("role", "img");
+            svg.setAttribute("aria-label", "Grafo da história");
+
+            const defs = document.createElementNS(svgNS, "defs");
+            const marker = document.createElementNS(svgNS, "marker");
+            marker.setAttribute("id", "fallback-arrow");
+            marker.setAttribute("viewBox", "0 0 10 10");
+            marker.setAttribute("refX", "9");
+            marker.setAttribute("refY", "5");
+            marker.setAttribute("markerWidth", "6");
+            marker.setAttribute("markerHeight", "6");
+            marker.setAttribute("orient", "auto-start-reverse");
+            const arrow = document.createElementNS(svgNS, "path");
+            arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+            arrow.setAttribute("fill", "#d8d8ff");
+            marker.appendChild(arrow);
+            defs.appendChild(marker);
+            svg.appendChild(defs);
+
+            const message = document.createElementNS(svgNS, "text");
+            message.setAttribute("x", "26");
+            message.setAttribute("y", "36");
+            message.setAttribute("fill", "#ffcc88");
+            message.setAttribute("font-size", "17");
+            message.setAttribute("font-family", "Segoe UI, Arial, sans-serif");
+            message.textContent = reason || "Modo fallback: biblioteca vis-network não carregou.";
+            svg.appendChild(message);
+
+            visibleEdges.forEach(item => {
+                const from = positions[item.from];
+                const to = positions[item.to];
+                if (!from || !to) return;
+
+                const line = document.createElementNS(svgNS, "line");
+                line.setAttribute("x1", from.x);
+                line.setAttribute("y1", from.y);
+                line.setAttribute("x2", to.x);
+                line.setAttribute("y2", to.y);
+                line.setAttribute("stroke", edgeColorForFallback(item));
+                line.setAttribute("stroke-width", item.width || "1.5");
+                line.setAttribute("stroke-opacity", "0.66");
+                if (item.dashes) line.setAttribute("stroke-dasharray", Array.isArray(item.dashes) ? item.dashes.join(" ") : "7 7");
+                line.setAttribute("marker-end", "url(#fallback-arrow)");
+                svg.appendChild(line);
+            });
+
+            visibleNodes.forEach(item => {
+                const pos = positions[item.id];
+                const group = document.createElementNS(svgNS, "g");
+                group.setAttribute("tabindex", "0");
+                group.style.cursor = "pointer";
+
+                let shape;
+                if (item.shape === "box") {
+                    shape = document.createElementNS(svgNS, "rect");
+                    shape.setAttribute("x", pos.x - 54);
+                    shape.setAttribute("y", pos.y - 28);
+                    shape.setAttribute("width", "108");
+                    shape.setAttribute("height", "56");
+                    shape.setAttribute("rx", "7");
+                } else if (item.shape === "diamond") {
+                    shape = document.createElementNS(svgNS, "path");
+                    shape.setAttribute("d", `M ${pos.x} ${pos.y - 42} L ${pos.x + 56} ${pos.y} L ${pos.x} ${pos.y + 42} L ${pos.x - 56} ${pos.y} Z`);
+                } else if (item.shape === "triangle") {
+                    shape = document.createElementNS(svgNS, "path");
+                    shape.setAttribute("d", `M ${pos.x} ${pos.y - 44} L ${pos.x + 48} ${pos.y + 38} L ${pos.x - 48} ${pos.y + 38} Z`);
+                } else if (item.shape === "star") {
+                    shape = document.createElementNS(svgNS, "circle");
+                    shape.setAttribute("cx", pos.x);
+                    shape.setAttribute("cy", pos.y);
+                    shape.setAttribute("r", item.size || 28);
+                } else {
+                    shape = document.createElementNS(svgNS, "circle");
+                    shape.setAttribute("cx", pos.x);
+                    shape.setAttribute("cy", pos.y);
+                    shape.setAttribute("r", item.size || 24);
+                }
+
+                shape.setAttribute("fill", item.color || groups[item.group].color);
+                shape.setAttribute("stroke", "#ffffff");
+                shape.setAttribute("stroke-width", "1.5");
+                shape.setAttribute("opacity", "0.92");
+                group.appendChild(shape);
+
+                const title = document.createElementNS(svgNS, "title");
+                title.textContent = item.title.replace(/<br>/g, " - ").replace(/<[^>]*>/g, "");
+                group.appendChild(title);
+
+                const text = document.createElementNS(svgNS, "text");
+                text.setAttribute("x", pos.x);
+                text.setAttribute("y", pos.y + 64);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("fill", "#ffffff");
+                text.setAttribute("font-size", "13");
+                text.setAttribute("font-family", "Segoe UI, Arial, sans-serif");
+                text.textContent = item.label;
+                group.appendChild(text);
+
+                group.addEventListener("click", () => {
+                    status.textContent = `${item.label}: ${title.textContent.substring(0, 150)}`;
+                });
+
+                svg.appendChild(group);
+            });
+
+            container.innerHTML = "";
+            container.appendChild(svg);
+            status.textContent = "Grafo exibido em modo fallback. A versão interativa completa precisa carregar a biblioteca vis-network.";
+        }
+
+        if (!window.vis || !window.vis.Network || !window.vis.DataSet) {
+            renderFallbackGraph("Biblioteca vis-network não carregou. Verifique a conexão com unpkg.com ou use o fallback abaixo.");
+            document.querySelectorAll("#filterGroup input").forEach(cb => cb.addEventListener("change", () => renderFallbackGraph()));
+            return;
+        }
+
+        const nodes = new vis.DataSet(nodesData);
+        const edges = new vis.DataSet(edgesData);
+
+        const options = {
+            nodes: {
+                font: { size: 12, color: "#ffffff", face: "Segoe UI", strokeWidth: 0 },
+                borderWidth: 1.5,
+                shadow: { enabled: true, color: "rgba(0,0,0,0.35)", size: 8 },
+                margin: 8
+            },
+            edges: {
+                arrows: { to: { enabled: true, scaleFactor: 0.8 } },
+                smooth: { type: "dynamic", roundness: 0.35 },
+                font: { size: 9, color: "#eeeeee", align: "middle", strokeWidth: 0 },
+                color: { color: "#b0b0ff", highlight: "#ffcc88" },
+                selectionWidth: 2
+            },
+            physics: {
+                enabled: true,
+                stabilization: { iterations: 180, fit: true },
+                solver: "forceAtlas2Based",
+                forceAtlas2Based: {
+                    gravitationalConstant: -78,
+                    centralGravity: 0.012,
+                    springLength: 160,
+                    springConstant: 0.055,
+                    damping: 0.45,
+                    avoidOverlap: 0.75
+                },
+                minVelocity: 0.8
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 100,
+                zoomView: true,
+                dragView: true,
+                multiselect: false,
+                navigationButtons: false
+            },
+            layout: { randomSeed: 42, improvedLayout: true }
+        };
+
+        let network;
+        try {
+            network = new vis.Network(container, { nodes, edges }, options);
+            console.log("Grafo v2 inicializado com conexões detalhadas.");
+        } catch(err) {
+            console.error(err);
+            renderFallbackGraph("Erro ao criar grafo interativo. Usando visualização fallback.");
+            return;
+        }
+
+        network.once("stabilizationIterationsDone", () => {
+            network.fit({ animation: true });
+            status.textContent = "Grafo pronto. Clique em um nó para destacar identidade, causa, ritual, tempo, tecnologia e legado.";
+        });
+        setTimeout(() => network.fit({ animation: true }), 900);
+
+        let originalNodeColors = {};
+        let originalEdgeColors = {};
+        let originalEdgeWidths = {};
+
+        function cacheOriginalColors() {
+            if (Object.keys(originalNodeColors).length > 0) return;
+            nodes.forEach(item => { originalNodeColors[item.id] = item.color; });
+            edges.forEach(item => {
+                originalEdgeColors[item.id] = item.color && typeof item.color === "object"
+                    ? { ...item.color }
+                    : item.color;
+                originalEdgeWidths[item.id] = item.width;
+            });
+        }
+
+        function restoreColors() {
+            cacheOriginalColors();
+            nodes.update(Object.keys(originalNodeColors).map(id => ({ id, color: originalNodeColors[id] })));
+            edges.update(Object.keys(originalEdgeColors).map(id => ({
+                id,
+                color: originalEdgeColors[id],
+                width: originalEdgeWidths[id]
+            })));
+        }
+
+        network.on("click", function(params) {
+            cacheOriginalColors();
+
+            if (params.nodes.length === 0) {
+                restoreColors();
+                status.textContent = "Clique em um nó para destacar suas conexões narrativas.";
+                return;
+            }
+
+            const clickedNodeId = params.nodes[0];
+            const clickedNode = nodes.get(clickedNodeId);
+            const connectedEdges = network.getConnectedEdges(clickedNodeId);
+            const connectedNodes = network.getConnectedNodes(clickedNodeId);
+            const plainTitle = clickedNode.title.replace(/<br>/g, " - ").replace(/<[^>]*>/g, "");
+
+            restoreColors();
+            nodes.update({ id: clickedNodeId, color: "#fff08a" });
+            connectedNodes.forEach(id => nodes.update({ id, color: "#ffcc66" }));
+            connectedEdges.forEach(id => edges.update({ id, color: { color: "#ffd08a", highlight: "#ffd08a" }, width: 3 }));
+
+            status.textContent = `${clickedNode.label}: ${plainTitle.substring(0, 180)}`;
+        });
+
+        const checkboxes = document.querySelectorAll("#filterGroup input");
+        function applyFilter() {
+            const activeGroups = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            const activeSet = new Set(activeGroups);
+            const visibleIds = new Set();
+            const updatedNodes = nodesData.map(item => {
+                const visible = activeSet.has(item.group);
+                if (visible) visibleIds.add(item.id);
+                return { id: item.id, hidden: !visible };
+            });
+
+            const updatedEdges = edgesData.map(item => ({
+                id: item.id,
+                hidden: !(visibleIds.has(item.from) && visibleIds.has(item.to))
+            }));
+
+            nodes.update(updatedNodes);
+            edges.update(updatedEdges);
+            restoreColors();
+            network.fit({ animation: true });
+        }
+
+        checkboxes.forEach(cb => cb.addEventListener("change", applyFilter));
+
+        document.getElementById("fitBtn").onclick = () => network.fit({ animation: true });
+        document.getElementById("disablePhysics").onclick = () => network.setOptions({ physics: false });
+        document.getElementById("enablePhysics").onclick = () => network.setOptions({ physics: true });
+        window.addEventListener("resize", () => network.fit());
+    })();
+</script>
+</body>
+</html>
