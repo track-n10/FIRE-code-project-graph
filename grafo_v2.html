@@ -4,241 +4,364 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grafo Interativo - O Caos, o Ritual e o Selo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #0d0f16;
+            --panel: rgba(21, 24, 35, 0.82);
+            --panel-strong: #151820;
+            --line: rgba(255,255,255,0.11);
+            --muted: #aab1c8;
+            --text: #f5f7ff;
+            --cyan: #00f5d4;
+            --amber: #ffbf69;
+            --danger: #ff4d6d;
+            --purple: #9b5de5;
+            --blue: #00bbf9;
+            --pink: #f15bb5;
+            --yellow: #fee440;
+            --legacy: #83c5be;
+            --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
         }
 
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
         body {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+            margin: 0;
             overflow: hidden;
-            background: #0f1015;
-            color: #f0f0f0;
-            font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 14% 0%, rgba(155, 93, 229, 0.18), transparent 28rem),
+                radial-gradient(circle at 84% 9%, rgba(0, 245, 212, 0.13), transparent 30rem),
+                linear-gradient(135deg, #0b0d13 0%, #11131c 50%, #0b0d13 100%);
+            font-family: "Inter", "Segoe UI", sans-serif;
         }
 
-        #header {
+        button, input, select { font: inherit; }
+        button {
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.07);
+            color: var(--text);
+            cursor: pointer;
+            transition: transform .18s ease, border-color .18s ease, background .18s ease;
+        }
+        button:hover { transform: translateY(-1px); border-color: rgba(0,245,212,0.48); background: rgba(0,245,212,0.09); }
+
+        .app-shell {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .topbar {
             z-index: 20;
+            display: grid;
+            grid-template-columns: minmax(300px, 1fr) auto;
+            gap: 16px;
+            padding: 16px 20px 14px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(12, 14, 20, 0.82);
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 14px 42px rgba(0,0,0,0.24);
+        }
+
+        .eyebrow {
+            margin: 0 0 4px;
+            color: var(--amber);
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(1.05rem, 2vw, 1.45rem);
+            letter-spacing: -.02em;
+        }
+
+        .subtitle {
+            max-width: 820px;
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: .82rem;
+            line-height: 1.45;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 320px) auto auto;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .search-wrap, .select-wrap, .zoom-tools {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 7px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.045);
+        }
+
+        .search-wrap input, .select-wrap select {
+            width: 100%;
+            min-height: 34px;
+            border: 0;
+            outline: 0;
+            color: var(--text);
+            background: transparent;
+        }
+        .select-wrap select { min-width: 190px; color-scheme: dark; }
+        .search-wrap button, .zoom-tools button, .select-wrap button { min-height: 34px; padding: 0 13px; }
+
+        .graph-stage {
+            position: relative;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        #viewport {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        #world, #graph-container {
+            position: absolute;
+            inset: 0;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        #graph-container {
+            background:
+                linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
+                radial-gradient(circle at 50% 50%, rgba(0,245,212,0.07), transparent 42rem);
+            background-size: 48px 48px, 48px 48px, auto;
+        }
+
+        #graph-container svg { display: block; width: 100%; height: 100%; }
+
+        .vis-tooltip {
+            position: absolute;
+            z-index: 40;
+            max-width: 330px;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.14) !important;
+            border-radius: 16px !important;
+            background: rgba(8,10,15,0.9) !important;
+            box-shadow: var(--shadow);
+            color: var(--text) !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
+            font-size: .72rem !important;
+            line-height: 1.42;
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
+        }
+
+        .filter-dock {
+            position: absolute;
+            left: 18px;
+            top: 18px;
+            z-index: 14;
+            display: grid;
+            gap: 10px;
+            max-width: min(430px, calc(100vw - 36px));
+            max-height: calc(100% - 36px);
+            overflow: auto;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px;
+            background: rgba(9,11,16,0.68);
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
+            box-shadow: var(--shadow);
+        }
+        .dock-title { color: var(--amber); font-size: .68rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+        .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 9px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.045);
+            color: #dbe1f5;
+            font-size: .68rem;
+            cursor: pointer;
+            transition: border-color .18s ease, background .18s ease;
+        }
+        .chip:hover { border-color: rgba(0,245,212,0.38); background: rgba(0,245,212,0.07); }
+        .chip input { accent-color: var(--chip-color, var(--cyan)); }
+
+        .mini-results {
+            display: none;
+            max-height: 180px;
+            overflow: auto;
+            gap: 6px;
+        }
+        .mini-results.visible { display: grid; }
+        .result-btn {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 12px;
+            text-align: left;
+            color: #e9edff;
+            font-size: .72rem;
+        }
+        .result-btn small { display: block; margin-top: 2px; color: var(--muted); }
+
+        .detail-panel {
+            position: absolute;
+            right: 18px;
+            top: 18px;
+            z-index: 15;
+            width: min(390px, calc(100vw - 36px));
+            max-height: calc(100% - 36px);
+            overflow: auto;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,0.13);
+            border-radius: 24px;
+            background: rgba(11,13,19,0.78);
+            box-shadow: var(--shadow);
+            -webkit-backdrop-filter: blur(22px);
+            backdrop-filter: blur(22px);
+            transform: translateX(0);
+            transition: opacity .25s ease, transform .25s ease;
+        }
+        .detail-panel.empty { opacity: .78; }
+        .detail-panel h2 { margin: 7px 0 10px; font-size: 1.1rem; }
+        .detail-panel p { color: #d5daeb; font-size: .82rem; line-height: 1.55; }
+        .pill-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 12px 0; }
+        .pill {
+            padding: 5px 8px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            color: #dfe4f7;
+            font-size: .65rem;
+            font-weight: 700;
+        }
+        .panel-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .panel-actions button { min-height: 34px; padding: 0 12px; }
+
+        .bottombar {
+            z-index: 18;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 12px;
-            flex-wrap: wrap;
-            padding: 12px 20px;
-            background: #151720;
-            border-bottom: 1px solid #282b3a;
+            padding: 10px 18px;
+            border-top: 1px solid var(--line);
+            background: rgba(12,14,20,0.84);
+            color: var(--muted);
+            font-size: .72rem;
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
         }
+        .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+        .legend-section { display: contents; }
+        .legend-title { color: var(--amber); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+        .legend-item { display: inline-flex; align-items: center; gap: 6px; color: #d9d4e3; white-space: nowrap; }
+        .legend-swatch { width: 11px; height: 11px; border-radius: 50%; background: var(--swatch); }
+        .legend-line { width: 24px; height: 0; border-top: 2px solid var(--swatch); }
+        .legend-line.dashed { border-top-style: dashed; }
+        .status { max-width: 40vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--cyan); font-weight: 700; }
 
-        h1 {
-            font-size: 1.15rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            text-transform: uppercase;
-            color: #00f5d4;
-        }
-
-        .header-tools {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .filters {
-            display: flex;
-            gap: 8px 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            max-width: 860px;
-            padding: 7px 12px;
-            border: 1px solid #303344;
-            border-radius: 8px;
-            background: #171923;
-            font-size: 0.72rem;
-        }
-
-        .filters label {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-
-        .controls {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        button {
-            min-height: 31px;
-            padding: 0 11px;
-            border: 1px solid #35394a;
-            border-radius: 6px;
-            background: #202331;
-            color: #fff6e8;
-            font: inherit;
-            font-size: 0.78rem;
-            cursor: pointer;
-        }
-
-        button:hover {
-            border-color: #ffaa66;
-        }
-
-        #graph-container {
-            flex: 1;
-            width: 100%;
-            min-height: 0;
-            position: relative;
-            overflow: hidden;
-            background: #101118;
-        }
-
-        #graph-container svg {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        #legend {
-            position: absolute;
-            right: 14px;
-            bottom: 14px;
-            z-index: 10;
-            display: grid;
-            gap: 7px;
-            max-width: min(390px, calc(100vw - 28px));
-            max-height: min(30vh, 250px);
-            overflow: hidden;
-            padding: 9px 11px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-left: 2px solid rgba(255, 170, 102, 0.72);
-            border-radius: 8px;
-            background: rgba(8, 9, 14, 0.68);
-            backdrop-filter: blur(12px);
-            font-size: 0.64rem;
-            pointer-events: none;
-        }
-
-        .legend-section {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px 10px;
-        }
-
-        .legend-title {
-            color: #ffd08a;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-        }
-
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            color: #d9d4e3;
-            white-space: nowrap;
-        }
-
-        .legend-swatch {
-            width: 11px;
-            height: 11px;
-            border-radius: 50%;
-            background: var(--swatch);
-        }
-
-        .legend-line {
-            width: 16px;
-            height: 0;
-            border-top: 1px solid var(--swatch);
-        }
-
-        .legend-line.dashed {
-            border-top-style: dashed;
-        }
-
-        .status {
-            position: absolute;
-            left: 14px;
-            bottom: 14px;
-            z-index: 10;
-            max-width: min(720px, calc(100vw - 28px));
-            padding: 6px 10px;
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 8px;
-            background: rgba(8, 9, 14, 0.58);
-            color: #d9d4e3;
-            font-size: 0.68rem;
-            font-family: Consolas, "Courier New", monospace;
-            pointer-events: none;
-        }
-
-        @media (max-width: 760px) {
-            body {
-                overflow: auto;
-            }
-
-            #header {
-                align-items: flex-start;
-            }
-
-            h1 {
-                font-size: 0.95rem;
-            }
-
-            .filters {
-                max-width: 100%;
-            }
-
-            #legend {
-                position: static;
-                max-width: none;
-                margin: 0;
-                border-radius: 0;
-            }
-
-            .status {
-                position: static;
-                max-width: none;
-                border-radius: 0;
-            }
+        @media (max-width: 980px) {
+            .topbar { grid-template-columns: 1fr; }
+            .toolbar { grid-template-columns: 1fr; }
+            .filter-dock, .detail-panel { max-height: 34vh; }
+            .detail-panel { top: auto; bottom: 18px; }
+            .bottombar { align-items: flex-start; flex-direction: column; }
+            .status { max-width: 100%; white-space: normal; }
         }
     </style>
     <script src="https://unpkg.com/vis-network@9.1.6/dist/vis-network.min.js"></script>
 </head>
 <body>
-<div id="header">
-    <h1>Grafo da história | Caos, Ritual e Selo</h1>
-    <div class="header-tools">
-        <div class="filters" id="filterGroup"></div>
-        <div class="controls">
-            <button id="fitBtn" type="button">Centralizar</button>
-            <button id="disablePhysics" type="button">Travar física</button>
-            <button id="enablePhysics" type="button">Ativar física</button>
+<div class="app-shell">
+    <header class="topbar">
+        <div>
+            <p class="eyebrow">Grafo interativo</p>
+            <h1>O Caos, o Ritual e o Selo</h1>
+            <p class="subtitle">Explore personagens, rituais, tecnologia, linhas temporais e legado. Busque nós, filtre categorias e clique em qualquer ponto para revelar suas conexões narrativas.</p>
         </div>
-    </div>
-</div>
+        <div class="toolbar" aria-label="Controles do grafo">
+            <div class="search-wrap">
+                <input id="searchInput" type="search" placeholder="Buscar nó, personagem, evento..." autocomplete="off">
+                <button id="clearSearch" type="button">Limpar</button>
+            </div>
+            <div class="select-wrap">
+                <select id="nodeSelect" aria-label="Centralizar em nó"></select>
+                <button id="centerSelected" type="button">Centralizar</button>
+            </div>
+            <div class="zoom-tools">
+                <button id="zoomOut" type="button">−</button>
+                <button id="zoomIn" type="button">+</button>
+                <button id="fitBtn" type="button">Visão geral</button>
+            </div>
+        </div>
+    </header>
 
-<div id="graph-container"></div>
-<div id="legend"></div>
-<div class="status" id="status">Clique em um nó para destacar suas conexões narrativas.</div>
+    <main class="graph-stage">
+        <div id="viewport" aria-label="Canvas do grafo narrativo">
+            <div id="world">
+                <div id="graph-container"></div>
+            </div>
+        </div>
+
+        <section class="filter-dock" aria-label="Filtros do grafo">
+            <div class="dock-title">Filtros de nós</div>
+            <div class="chips" id="filterGroup"></div>
+            <div class="dock-title">Tipos de conexão</div>
+            <div class="chips" id="relationFilter"></div>
+            <div id="searchResults" class="mini-results"></div>
+            <div class="panel-actions">
+                <button id="disablePhysics" type="button">Travar física</button>
+                <button id="enablePhysics" type="button">Ativar física</button>
+            </div>
+        </section>
+
+        <aside id="detailPanel" class="detail-panel empty">
+            <p class="eyebrow">Painel narrativo</p>
+            <h2>Selecione um nó</h2>
+            <p>Passe pelo grafo com zoom e arraste. Ao clicar em um nó, suas conexões diretas serão destacadas e os detalhes aparecerão aqui.</p>
+        </aside>
+    </main>
+
+    <footer class="bottombar">
+        <div class="legend" id="legend"></div>
+        <div class="status" id="status">Clique em um nó para destacar suas conexões narrativas.</div>
+    </footer>
+</div>
 
 <script>
     (function() {
         const container = document.getElementById("graph-container");
         const filterGroup = document.getElementById("filterGroup");
+        const relationFilter = document.getElementById("relationFilter");
         const legend = document.getElementById("legend");
         const status = document.getElementById("status");
-        if (!container || !filterGroup || !legend || !status) return;
+        const searchInput = document.getElementById("searchInput");
+        const clearSearch = document.getElementById("clearSearch");
+        const searchResults = document.getElementById("searchResults");
+        const nodeSelect = document.getElementById("nodeSelect");
+        const centerSelected = document.getElementById("centerSelected");
+        const detailPanel = document.getElementById("detailPanel");
+        const zoomIn = document.getElementById("zoomIn");
+        const zoomOut = document.getElementById("zoomOut");
+        if (!container || !filterGroup || !relationFilter || !legend || !status || !detailPanel) return;
 
         const groups = {
             identity: { label: "Julian / Kael / Silas", color: "#ff4d6d" },
@@ -598,7 +721,11 @@
 
         function renderFilters() {
             filterGroup.innerHTML = Object.entries(groups).map(([id, group]) => `
-                <label><input type="checkbox" value="${id}" checked> ${group.label}</label>
+                <label class="chip" style="--chip-color:${group.color}"><input type="checkbox" value="${id}" checked> ${group.label}</label>
+            `).join("");
+
+            relationFilter.innerHTML = Object.entries(relationTypes).map(([id, type]) => `
+                <label class="chip" style="--chip-color:${type.color}"><input type="checkbox" value="${id}" checked> ${type.label}</label>
             `).join("");
         }
 
@@ -612,15 +739,37 @@
             `).join("");
 
             legend.innerHTML = `
-                <div class="legend-title">Nós</div>
-                <div class="legend-section">${nodeLegend}</div>
-                <div class="legend-title">Conexões</div>
-                <div class="legend-section">${edgeLegend}</div>
+                <span class="legend-title">Nós</span>
+                <span class="legend-section">${nodeLegend}</span>
+                <span class="legend-title">Conexões</span>
+                <span class="legend-section">${edgeLegend}</span>
             `;
+        }
+
+        function normalizeText(value) {
+            return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
+        function plainTitle(value) {
+            return String(value || "").replace(/<br>/g, " - ").replace(/<[^>]*>/g, "");
+        }
+
+        function checkedValues(root) {
+            return new Set(Array.from(root.querySelectorAll("input:checked")).map(input => input.value));
+        }
+
+        function populateNodeSelect() {
+            if (!nodeSelect) return;
+            nodeSelect.innerHTML = nodesData
+                .slice()
+                .sort((a, b) => a.label.localeCompare(b.label, "pt-BR"))
+                .map(item => `<option value="${item.id}">${item.label}</option>`)
+                .join("");
         }
 
         renderFilters();
         renderLegend();
+        populateNodeSelect();
 
         function edgeColorForFallback(item) {
             if (typeof item.color === "string") return item.color;
@@ -846,14 +995,15 @@
         network.once("stabilizationIterationsDone", () => {
             network.setOptions({ physics: false });
             network.fit({ animation: true });
-            status.textContent = "Grafo pronto. Clique em um nó para destacar identidade, causa, ritual, tempo, tecnologia e legado.";
+            status.textContent = "Grafo pronto. Busque, filtre ou clique em um nó para revelar suas conexões.";
         });
         setTimeout(() => {
             network.setOptions({ physics: false });
             network.fit({ animation: true });
-            status.textContent = "Grafo pronto. Clique em um nó para destacar identidade, causa, ritual, tempo, tecnologia e legado.";
+            status.textContent = "Grafo pronto. Busque, filtre ou clique em um nó para revelar suas conexões.";
         }, 1200);
 
+        const uiState = { selectedId: null };
         let originalNodeColors = {};
         let originalEdgeColors = {};
         let originalEdgeWidths = {};
@@ -885,76 +1035,182 @@
             })));
         }
 
-        network.on("click", function(params) {
+        function nodeDescription(nodeItem) {
+            return plainTitle(nodeItem.title).replace(`${nodeItem.label} - `, "");
+        }
+
+        function relatedLabel(edgeItem, currentId) {
+            const otherId = edgeItem.from === currentId ? edgeItem.to : edgeItem.from;
+            const otherNode = nodes.get(otherId) || nodesData.find(item => item.id === otherId);
+            return otherNode ? otherNode.label : otherId;
+        }
+
+        function updateDetailPanel(nodeId, connectedEdgeIds) {
+            const nodeItem = nodes.get(nodeId);
+            if (!nodeItem) return;
+            const group = groups[nodeItem.group] || groups.other;
+            const connectedEdges = connectedEdgeIds.map(id => edges.get(id)).filter(Boolean);
+            const outgoing = connectedEdges.filter(edgeItem => edgeItem.from === nodeId);
+            const incoming = connectedEdges.filter(edgeItem => edgeItem.to === nodeId);
+            const relationPills = [...new Set(connectedEdges.map(edgeItem => edgeItem.relation))]
+                .map(relation => `<span class="pill">${relationTypes[relation]?.label || relation}</span>`).join("");
+            const connectionList = connectedEdges.length
+                ? connectedEdges.slice(0, 8).map(edgeItem => `<span class="pill">${relatedLabel(edgeItem, nodeId)} · ${edgeItem.title || relationTypes[edgeItem.relation]?.label}</span>`).join("")
+                : `<span class="pill">sem conexões visíveis</span>`;
+
+            detailPanel.classList.remove("empty");
+            detailPanel.innerHTML = `
+                <p class="eyebrow">${group.label}</p>
+                <h2>${nodeItem.label}</h2>
+                <p>${nodeDescription(nodeItem)}</p>
+                <div class="pill-row">
+                    <span class="pill" style="border-color:${group.color};color:${group.color}">categoria</span>
+                    <span class="pill">${incoming.length} entrada(s)</span>
+                    <span class="pill">${outgoing.length} saída(s)</span>
+                    ${relationPills}
+                </div>
+                <p><strong>Conexões destacadas:</strong></p>
+                <div class="pill-row">${connectionList}</div>
+                <div class="panel-actions">
+                    <button type="button" id="panelCenter">Centralizar</button>
+                    <button type="button" id="panelClear">Remover destaque</button>
+                </div>
+            `;
+            document.getElementById("panelCenter").addEventListener("click", () => focusNode(nodeId));
+            document.getElementById("panelClear").addEventListener("click", () => clearSelection(true));
+        }
+
+        function clearSelection(restore = true) {
+            uiState.selectedId = null;
+            network.unselectAll();
+            if (restore) restoreColors();
+            detailPanel.classList.add("empty");
+            detailPanel.innerHTML = `<p class="eyebrow">Painel narrativo</p><h2>Selecione um nó</h2><p>Passe pelo grafo com zoom e arraste. Ao clicar em um nó, suas conexões diretas serão destacadas e os detalhes aparecerão aqui.</p>`;
+            status.textContent = "Clique em um nó para destacar suas conexões narrativas.";
+        }
+
+        function highlightNode(nodeId, center = false) {
             cacheOriginalColors();
+            const clickedNode = nodes.get(nodeId);
+            if (!clickedNode || clickedNode.hidden) return;
+            uiState.selectedId = nodeId;
+            if (nodeSelect) nodeSelect.value = nodeId;
 
-            if (params.nodes.length === 0) {
-                restoreColors();
-                status.textContent = "Clique em um nó para destacar suas conexões narrativas.";
-                return;
-            }
-
-            const clickedNodeId = params.nodes[0];
-            const clickedNode = nodes.get(clickedNodeId);
-            const connectedEdges = network.getConnectedEdges(clickedNodeId);
-            const connectedNodes = network.getConnectedNodes(clickedNodeId);
-            const plainTitle = clickedNode.title.replace(/<br>/g, " - ").replace(/<[^>]*>/g, "");
-
+            const connectedEdges = network.getConnectedEdges(nodeId).filter(edgeId => !edges.get(edgeId)?.hidden);
+            const connectedNodes = new Set(network.getConnectedNodes(nodeId).filter(connectedId => !nodes.get(connectedId)?.hidden));
             const allNodes = nodes.get();
             const allEdges = edges.get();
 
-            const updatedNodes = allNodes.map(n => {
-                if (n.id === clickedNodeId) {
-                    return { id: n.id, opacity: 1, font: { color: "#ffffff" } };
-                } else if (connectedNodes.includes(n.id)) {
-                    return { id: n.id, opacity: 1, font: { color: "#eeeeee" } };
-                } else {
-                    return { id: n.id, opacity: 0.15, font: { color: "rgba(255,255,255,0.1)" } };
+            nodes.update(allNodes.map(item => {
+                if (item.id === nodeId) return { id: item.id, opacity: 1, font: { color: "#ffffff" } };
+                if (connectedNodes.has(item.id)) return { id: item.id, opacity: 1, font: { color: "#eeeeee" } };
+                return { id: item.id, opacity: 0.13, font: { color: "rgba(255,255,255,0.12)" } };
+            }));
+
+            edges.update(allEdges.map(item => {
+                if (connectedEdges.includes(item.id)) {
+                    const relation = relationTypes[item.relation] || relationTypes.causality;
+                    return { id: item.id, opacity: 1, color: { color: relation.color, highlight: "#ffffff" }, width: Math.max(2.2, (item.width || 1) + 1.1) };
                 }
+                return { id: item.id, opacity: 0.035 };
+            }));
+
+            network.selectNodes([nodeId]);
+            updateDetailPanel(nodeId, connectedEdges);
+            status.textContent = `${clickedNode.label}: ${nodeDescription(clickedNode).substring(0, 180)}`;
+            if (center) focusNode(nodeId);
+        }
+
+        function focusNode(nodeId) {
+            network.focus(nodeId, {
+                scale: Math.max(network.getScale(), 1.05),
+                animation: { duration: 420, easingFunction: "easeInOutQuad" }
             });
+        }
 
-            const updatedEdges = allEdges.map(e => {
-                if (connectedEdges.includes(e.id)) {
-                    return { id: e.id, opacity: 1, color: { color: "#ffffff", highlight: "#ffffff" }, width: 2.1 };
-                } else {
-                    return { id: e.id, opacity: 0.035 };
-                }
-            });
+        function renderSearchResults(visibleIds, query) {
+            if (!searchResults) return;
+            if (!query) {
+                searchResults.classList.remove("visible");
+                searchResults.innerHTML = "";
+                return;
+            }
+            const matches = nodesData.filter(item => visibleIds.has(item.id)).slice(0, 10);
+            searchResults.innerHTML = matches.length
+                ? matches.map(item => `<button type="button" class="result-btn" data-id="${item.id}">${item.label}<small>${groups[item.group]?.label || item.group}</small></button>`).join("")
+                : `<span class="chip">Nenhum nó encontrado</span>`;
+            searchResults.classList.add("visible");
+            searchResults.querySelectorAll("button").forEach(button => button.addEventListener("click", () => highlightNode(button.dataset.id, true)));
+        }
 
-            nodes.update(updatedNodes);
-            edges.update(updatedEdges);
-
-            status.textContent = `${clickedNode.label}: ${plainTitle.substring(0, 180)}`;
-        });
-
-        const checkboxes = document.querySelectorAll("#filterGroup input");
-        function applyFilter() {
-            const activeGroups = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
-            const activeSet = new Set(activeGroups);
+        function applyFilter(options = {}) {
+            const activeGroups = checkedValues(filterGroup);
+            const activeRelations = checkedValues(relationFilter);
+            const query = normalizeText(searchInput ? searchInput.value : "");
             const visibleIds = new Set();
+
             const updatedNodes = nodesData.map(item => {
-                const visible = activeSet.has(item.group);
+                const haystack = normalizeText(`${item.label} ${plainTitle(item.title)} ${groups[item.group]?.label || ""}`);
+                const visible = activeGroups.has(item.group) && (!query || haystack.includes(query));
                 if (visible) visibleIds.add(item.id);
                 return { id: item.id, hidden: !visible };
             });
 
             const updatedEdges = edgesData.map(item => ({
                 id: item.id,
-                hidden: !(visibleIds.has(item.from) && visibleIds.has(item.to))
+                hidden: !(visibleIds.has(item.from) && visibleIds.has(item.to) && activeRelations.has(item.relation))
             }));
 
             nodes.update(updatedNodes);
             edges.update(updatedEdges);
             restoreColors();
-            network.fit({ animation: true });
+            renderSearchResults(visibleIds, query);
+
+            if (uiState.selectedId && visibleIds.has(uiState.selectedId)) {
+                highlightNode(uiState.selectedId, false);
+            } else if (uiState.selectedId) {
+                clearSelection(false);
+            }
+            if (options.fit) network.fit({ animation: true });
         }
 
-        checkboxes.forEach(cb => cb.addEventListener("change", applyFilter));
+        function zoomBy(factor) {
+            const nextScale = Math.max(0.28, Math.min(2.4, network.getScale() * factor));
+            network.moveTo({ scale: nextScale, animation: { duration: 180, easingFunction: "easeInOutQuad" } });
+        }
+
+        network.on("click", function(params) {
+            if (params.nodes.length === 0) {
+                clearSelection(true);
+                return;
+            }
+            highlightNode(params.nodes[0], false);
+        });
+
+        filterGroup.addEventListener("change", () => applyFilter({ fit: true }));
+        relationFilter.addEventListener("change", () => applyFilter({ fit: false }));
+        if (searchInput) {
+            searchInput.addEventListener("input", () => applyFilter({ fit: false }));
+            searchInput.addEventListener("keydown", event => {
+                if (event.key !== "Enter") return;
+                const firstResult = searchResults?.querySelector("button[data-id]");
+                if (firstResult) highlightNode(firstResult.dataset.id, true);
+            });
+        }
+        if (clearSearch) clearSearch.addEventListener("click", () => {
+            searchInput.value = "";
+            applyFilter({ fit: true });
+        });
+        if (centerSelected) centerSelected.addEventListener("click", () => highlightNode(nodeSelect.value, true));
+        if (nodeSelect) nodeSelect.addEventListener("change", () => highlightNode(nodeSelect.value, true));
+        if (zoomIn) zoomIn.addEventListener("click", () => zoomBy(1.18));
+        if (zoomOut) zoomOut.addEventListener("click", () => zoomBy(0.84));
 
         document.getElementById("fitBtn").onclick = () => network.fit({ animation: true });
         document.getElementById("disablePhysics").onclick = () => network.setOptions({ physics: false });
         document.getElementById("enablePhysics").onclick = () => network.setOptions({ physics: true });
         window.addEventListener("resize", () => network.fit());
+        applyFilter({ fit: false });
     })();
 </script>
 </body>
