@@ -4,767 +4,978 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Linha do Tempo - O Caos, o Ritual e o Selo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #101118;
-            --panel: #171923;
-            --panel-soft: #202331;
-            --text: #f5f1ea;
-            --muted: #aaa7b5;
-            --axis: #4d5166;
-            --accent: #f4b35e;
-            --card-width: 236px;
+            --bg: #0d0f16;
+            --panel: rgba(21, 24, 35, 0.82);
+            --panel-strong: #151820;
+            --line: rgba(255,255,255,0.11);
+            --muted: #aab1c8;
+            --text: #f5f7ff;
+            --cyan: #00f5d4;
+            --amber: #ffbf69;
+            --danger: #ff4d6d;
+            --purple: #9b5de5;
+            --blue: #00bbf9;
+            --pink: #f15bb5;
+            --yellow: #fee440;
+            --legacy: #83c5be;
+            --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
         }
 
         * { box-sizing: border-box; }
-
+        html, body { height: 100%; }
         body {
             margin: 0;
-            height: 100vh;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            font-family: "Segoe UI", Roboto, Arial, sans-serif;
-            background: var(--bg);
             color: var(--text);
+            background:
+                radial-gradient(circle at 14% 0%, rgba(155, 93, 229, 0.18), transparent 28rem),
+                radial-gradient(circle at 84% 9%, rgba(0, 245, 212, 0.13), transparent 30rem),
+                linear-gradient(135deg, #0b0d13 0%, #11131c 50%, #0b0d13 100%);
+            font-family: "Inter", "Segoe UI", sans-serif;
+        }
+
+        button, input, select { font: inherit; }
+        button {
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.07);
+            color: var(--text);
+            cursor: pointer;
+            transition: transform .18s ease, border-color .18s ease, background .18s ease;
+        }
+        button:hover { transform: translateY(-1px); border-color: rgba(0,245,212,0.48); background: rgba(0,245,212,0.09); }
+
+        .app-shell {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100%;
+            min-height: 0;
         }
 
         .topbar {
-            flex: 0 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            z-index: 20;
+            display: grid;
+            grid-template-columns: minmax(300px, 1fr) auto;
             gap: 16px;
-            padding: 14px 18px;
-            background: #0b0c12;
-            border-bottom: 1px solid #2a2d3a;
+            padding: 16px 20px 14px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(12, 14, 20, 0.82);
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 14px 42px rgba(0,0,0,0.24);
+        }
+
+        .eyebrow {
+            margin: 0 0 4px;
+            color: var(--amber);
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .16em;
+            text-transform: uppercase;
         }
 
         h1 {
             margin: 0;
-            font-size: 1rem;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            color: #ffd08a;
-            white-space: nowrap;
+            font-size: clamp(1.05rem, 2vw, 1.45rem);
+            letter-spacing: -.02em;
+        }
+
+        .subtitle {
+            max-width: 820px;
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: .82rem;
+            line-height: 1.45;
         }
 
         .toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: minmax(220px, 320px) auto auto;
+            align-items: start;
             gap: 10px;
         }
 
-        input, select, button {
-            border: 1px solid #343849;
-            background: var(--panel-soft);
-            color: var(--text);
-            border-radius: 6px;
-            min-height: 34px;
-            padding: 0 11px;
-            font: inherit;
-            font-size: 0.82rem;
-        }
-
-        input { width: min(260px, 38vw); }
-
-        button {
-            cursor: pointer;
-            color: #fff6e8;
-        }
-
-        button:hover, input:focus, select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .spacing-control {
-            display: inline-flex;
-            align-items: center;
+        .search-wrap, .select-wrap, .zoom-tools {
+            display: flex;
             gap: 8px;
-            color: var(--muted);
-            font-size: 0.78rem;
+            align-items: center;
+            padding: 7px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.045);
         }
 
-        input[type="range"] {
-            width: 120px;
-            min-height: auto;
-            padding: 0;
+        .search-wrap input, .select-wrap select {
+            width: 100%;
+            min-height: 34px;
+            border: 0;
+            outline: 0;
+            color: var(--text);
+            background: transparent;
         }
-
-        .timeline-shell {
-            flex: 1 1 auto;
-            overflow: auto;
-            background:
-                linear-gradient(180deg, rgba(255,255,255,0.035), transparent 160px),
-                #0d0e15;
-            cursor: grab;
-        }
-
-        .timeline-shell.dragging { cursor: grabbing; }
+        .select-wrap select { min-width: 190px; color-scheme: dark; }
+        .search-wrap button, .zoom-tools button, .select-wrap button { min-height: 34px; padding: 0 13px; }
 
         .timeline-stage {
             position: relative;
-            min-width: 100%;
-            min-height: 100%;
+            min-height: 0;
+            overflow: hidden;
         }
 
-        .axis {
-            position: absolute;
-            top: 74px;
-            height: 4px;
-            background: var(--axis);
-            border-radius: 4px;
-        }
-
-        .axis::before, .axis::after {
-            content: "";
-            position: absolute;
-            top: -5px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: var(--accent);
-        }
-
-        .axis::before { left: -2px; }
-        .axis::after { right: -2px; }
-
-        .act-marker {
-            position: absolute;
-            top: 22px;
-            height: 28px;
-            padding: 6px 10px;
-            border-left: 2px solid var(--accent);
-            color: #ffd08a;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .lane {
-            position: absolute;
-            left: 0;
-            border-top: 1px solid rgba(255,255,255,0.07);
-            background: rgba(255,255,255,0.018);
-        }
-
-        .lane:nth-child(even) { background: rgba(255,255,255,0.035); }
-
-        .lane-name {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 172px;
+        #viewport {
+            width: 100%;
             height: 100%;
-            display: flex;
-            align-items: flex-start;
-            padding: 14px;
-            background: linear-gradient(90deg, rgba(13,14,21,0.95), rgba(13,14,21,0.72), transparent);
-            color: var(--muted);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            pointer-events: none;
+            overflow: hidden;
+            cursor: grab;
+            touch-action: none;
         }
+        #viewport.dragging { cursor: grabbing; }
 
-        #links {
+        #world {
+            position: relative;
+            width: 1000px;
+            height: 1000px;
+            transform-origin: 0 0;
+            transition: transform .18s ease-out;
+        }
+        #viewport.dragging #world { transition: none; }
+
+        .connections {
             position: absolute;
             inset: 0;
             overflow: visible;
             pointer-events: none;
-            z-index: 2;
         }
+        .connection-path {
+            fill: none;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            opacity: .52;
+            transition: opacity .2s ease, stroke-width .2s ease;
+        }
+        .connection-path.temporal, .connection-path.manipulation, .connection-path.legacy { stroke-dasharray: 9 9; }
+        .connection-path.hidden { opacity: .04; }
+        .connection-path.focus { opacity: .95; stroke-width: 3.8; }
+
+        .act-band {
+            position: absolute;
+            top: 26px;
+            bottom: 28px;
+            border-left: 1px solid rgba(255,255,255,0.11);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
+        }
+        .act-band:nth-child(even) { background: linear-gradient(180deg, rgba(0,245,212,0.035), rgba(255,255,255,0.01)); }
+        .act-label {
+            position: sticky;
+            left: 0;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 10px;
+            margin: 14px 0 0 18px;
+            padding: 7px 12px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 999px;
+            background: rgba(8,10,15,0.72);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+        }
+        .act-label strong { color: var(--cyan); font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
+        .act-label span { color: var(--muted); font-size: .72rem; }
+
+        .lane-row {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 132px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            background: linear-gradient(90deg, rgba(255,255,255,0.026), transparent 20%, rgba(255,255,255,0.018));
+        }
+        .lane-row::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            border-top: 1px dashed rgba(255,255,255,0.08);
+        }
+        .lane-label {
+            position: sticky;
+            left: 18px;
+            z-index: 4;
+            display: inline-flex;
+            flex-direction: column;
+            min-width: 158px;
+            margin-top: 16px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255,255,255,0.16);
+            box-shadow: inset 3px 0 0 var(--lane-color), 0 12px 24px rgba(0,0,0,0.18);
+            border-radius: 16px;
+            background: rgba(8,10,15,0.7);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+        }
+        .lane-label strong { color: var(--lane-color); font-size: .82rem; }
+        .lane-label span { margin-top: 4px; color: var(--muted); font-size: .68rem; line-height: 1.25; }
 
         .event-card {
             position: absolute;
-            z-index: 4;
-            width: var(--card-width);
-            min-height: 92px;
-            padding: 11px 12px 12px;
-            border: 1px solid rgba(255,255,255,0.10);
-            border-left: 5px solid var(--group-color);
-            border-radius: 8px;
-            background: #181a24;
-            box-shadow: 0 9px 24px rgba(0,0,0,0.28);
+            z-index: 6;
+            width: 164px;
+            min-height: 78px;
+            padding: 10px 11px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-left: 3px solid var(--event-color);
+            border-radius: 16px;
+            background: rgba(15, 17, 25, 0.86);
+            box-shadow: var(--shadow);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            transform: translate(-50%, -50%);
+            transition: opacity .22s ease, transform .22s ease, border-color .22s ease, box-shadow .22s ease;
             cursor: pointer;
-            transition: transform 0.16s ease, opacity 0.16s ease, border-color 0.16s ease, background 0.16s ease;
         }
-
-        .event-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 8px;
-            background: var(--group-color);
-            opacity: 0.14;
-            pointer-events: none;
+        .event-card:hover, .event-card.active {
+            border-color: var(--event-color);
+            box-shadow: 0 0 0 1px var(--event-color), 0 24px 70px rgba(0,0,0,.5);
+            transform: translate(-50%, -50%) scale(1.045);
         }
-
-        .event-card > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        .event-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(255,255,255,0.28);
-        }
-
-        .event-card.selected {
-            background: #211d1a;
-            border-color: #fff1cb;
-            box-shadow: 0 0 0 2px rgba(244,179,94,0.36), 0 12px 28px rgba(0,0,0,0.44);
-        }
-
-        .event-card.dim { opacity: 0.34; }
-        .event-card.related { opacity: 1; border-color: rgba(255,255,255,0.34); }
-
-        .event-kicker {
+        .event-card.is-dimmed { opacity: .16; pointer-events: none; }
+        .event-card .meta {
             display: flex;
             justify-content: space-between;
             gap: 8px;
-            margin-bottom: 7px;
-            color: #d9d1c2;
-            font-size: 0.66rem;
+            color: var(--muted);
+            font-size: .62rem;
             font-weight: 700;
-            letter-spacing: 0.05em;
+            letter-spacing: .07em;
             text-transform: uppercase;
         }
-
-        .event-title {
-            margin-bottom: 7px;
-            font-size: 0.86rem;
-            font-weight: 800;
-            line-height: 1.2;
-            overflow-wrap: anywhere;
+        .event-card h3 { margin: 7px 0 5px; font-size: .82rem; line-height: 1.15; }
+        .event-card p { margin: 0; color: #cdd3e6; font-size: .68rem; line-height: 1.32; }
+        .event-card .dot {
+            position: absolute;
+            left: 50%;
+            bottom: -18px;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #10131c;
+            border-radius: 999px;
+            background: var(--event-color);
+            box-shadow: 0 0 26px var(--event-color);
+            transform: translateX(-50%);
         }
 
-        .event-desc {
-            color: #d4d0dc;
-            font-size: 0.72rem;
-            line-height: 1.35;
-        }
-
-        .event-tags {
-            margin-top: 9px;
-            color: #b9b5c5;
-            font-size: 0.66rem;
-            overflow-wrap: anywhere;
-        }
-
-        .bottom-panel {
-            flex: 0 0 auto;
+        .filter-dock {
+            position: absolute;
+            left: 18px;
+            top: 18px;
+            z-index: 14;
             display: grid;
-            grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.2fr);
-            gap: 14px;
-            align-items: center;
-            padding: 10px 14px;
-            background: #0b0c12;
-            border-top: 1px solid #292d3a;
+            gap: 10px;
+            max-width: min(420px, calc(100vw - 36px));
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px;
+            background: rgba(9,11,16,0.68);
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
+            box-shadow: var(--shadow);
         }
-
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 12px;
-        }
-
-        .legend-item {
+        .dock-title { color: var(--amber); font-size: .68rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+        .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+        .chip {
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            padding: 6px 9px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.045);
+            color: #dbe1f5;
+            font-size: .68rem;
+            cursor: pointer;
+        }
+        .chip input { accent-color: var(--chip-color, var(--cyan)); }
+
+        .mini-results {
+            display: none;
+            max-height: 180px;
+            overflow: auto;
+            gap: 6px;
+        }
+        .mini-results.visible { display: grid; }
+        .result-btn {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 12px;
+            text-align: left;
+            color: #e9edff;
+            font-size: .72rem;
+        }
+        .result-btn small { display: block; margin-top: 2px; color: var(--muted); }
+
+        .detail-panel {
+            position: absolute;
+            right: 18px;
+            top: 18px;
+            z-index: 15;
+            width: min(390px, calc(100vw - 36px));
+            max-height: calc(100% - 36px);
+            overflow: auto;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,0.13);
+            border-radius: 24px;
+            background: rgba(11,13,19,0.78);
+            box-shadow: var(--shadow);
+            -webkit-backdrop-filter: blur(22px);
+            backdrop-filter: blur(22px);
+            transform: translateX(0);
+            transition: opacity .25s ease, transform .25s ease;
+        }
+        .detail-panel.empty { opacity: .78; }
+        .detail-panel h2 { margin: 7px 0 10px; font-size: 1.1rem; }
+        .detail-panel p { color: #d5daeb; font-size: .82rem; line-height: 1.55; }
+        .pill-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 12px 0; }
+        .pill {
+            padding: 5px 8px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            color: #dfe4f7;
+            font-size: .65rem;
+            font-weight: 700;
+        }
+        .panel-actions { display: flex; gap: 8px; margin-top: 14px; }
+        .panel-actions button { min-height: 34px; padding: 0 12px; }
+
+        .tooltip {
+            position: fixed;
+            z-index: 40;
+            display: none;
+            max-width: 330px;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 16px;
+            background: rgba(8,10,15,0.9);
+            box-shadow: var(--shadow);
+            pointer-events: none;
+        }
+        .tooltip.visible { display: block; }
+        .tooltip strong { display: block; margin-bottom: 5px; color: var(--cyan); }
+        .tooltip span { color: var(--muted); font-size: .72rem; line-height: 1.42; }
+
+        .bottombar {
+            z-index: 18;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 18px;
+            border-top: 1px solid var(--line);
+            background: rgba(12,14,20,0.84);
             color: var(--muted);
-            font-size: 0.7rem;
-            white-space: nowrap;
+            font-size: .72rem;
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
         }
+        .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+        .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+        .legend-line { width: 24px; border-top: 2px solid var(--legend-color); }
+        .legend-line.dashed { border-top-style: dashed; }
+        #scaleReadout { color: var(--cyan); font-weight: 800; }
 
-        .legend-swatch {
-            width: 11px;
-            height: 11px;
-            border-radius: 3px;
-            background: var(--group-color);
-        }
-
-        .detail {
-            min-height: 54px;
-            padding: 10px 12px;
-            border: 1px solid #303442;
-            border-radius: 8px;
-            background: #171923;
-            color: #d8d4e2;
-            font-size: 0.78rem;
-            line-height: 1.4;
-        }
-
-        .detail strong { color: #ffd08a; }
-
-        @media (max-width: 900px) {
-            body { overflow: auto; }
-            .topbar { align-items: flex-start; flex-direction: column; }
-            h1 { white-space: normal; }
-            .toolbar { justify-content: flex-start; }
-            input { width: min(100%, 420px); }
-            .bottom-panel { grid-template-columns: 1fr; }
+        @media (max-width: 980px) {
+            .topbar { grid-template-columns: 1fr; }
+            .toolbar { grid-template-columns: 1fr; }
+            .filter-dock, .detail-panel { max-height: 34vh; }
+            .detail-panel { top: auto; bottom: 18px; }
         }
     </style>
 </head>
 <body>
+<div class="app-shell">
     <header class="topbar">
-        <h1>Linha do Tempo - O Caos, o Ritual e o Selo</h1>
-        <div class="toolbar">
-            <input id="searchInput" type="search" placeholder="Buscar na escaleta">
-            <select id="actFilter" aria-label="Filtrar por ato">
-                <option value="all">Todos os atos</option>
-            </select>
-            <select id="laneFilter" aria-label="Filtrar por faixa">
-                <option value="all">Todas as faixas</option>
-            </select>
-            <span class="spacing-control">
-                Espaçamento
-                <input id="spacingSlider" type="range" min="0.72" max="1.55" step="0.01" value="1">
-                <span id="spacingValue">100%</span>
-            </span>
-            <button id="resetBtn" type="button">Centralizar</button>
+        <div>
+            <p class="eyebrow">Linha do tempo interativa</p>
+            <h1>O Caos, o Ritual e o Selo</h1>
+            <p class="subtitle">Arraste o canvas para navegar, use o zoom para atravessar os Atos e clique nos eventos para revelar conexões de causalidade, manipulação e paradoxo temporal.</p>
+        </div>
+        <div class="toolbar" aria-label="Controles da linha do tempo">
+            <div class="search-wrap">
+                <input id="searchInput" type="search" placeholder="Buscar evento, personagem, ritual..." autocomplete="off">
+                <button id="clearSearch" type="button">Limpar</button>
+            </div>
+            <div class="select-wrap">
+                <select id="eventSelect" aria-label="Centralizar em evento"></select>
+                <button id="centerSelected" type="button">Centralizar</button>
+            </div>
+            <div class="zoom-tools">
+                <button id="zoomOut" type="button">−</button>
+                <button id="zoomIn" type="button">+</button>
+                <button id="fitStory" type="button">Visão geral</button>
+            </div>
         </div>
     </header>
 
-    <main class="timeline-shell" id="timelineShell">
-        <section class="timeline-stage" id="timelineStage">
-            <div id="actMarkers"></div>
-            <div class="axis" id="axis"></div>
-            <div id="lanes"></div>
-            <svg id="links" aria-hidden="true"></svg>
-            <div id="cards"></div>
+    <main class="timeline-stage">
+        <div id="viewport" aria-label="Canvas horizontal da linha do tempo">
+            <div id="world">
+                <div id="actLayer"></div>
+                <div id="laneLayer"></div>
+                <svg id="connections" class="connections" aria-hidden="true"></svg>
+                <div id="eventLayer"></div>
+            </div>
+        </div>
+
+        <section class="filter-dock" aria-label="Filtros de visualização">
+            <div class="dock-title">Filtros</div>
+            <div id="laneFilters" class="chips"></div>
+            <div id="relationFilters" class="chips"></div>
+            <div id="searchResults" class="mini-results"></div>
         </section>
+
+        <aside id="detailPanel" class="detail-panel empty">
+            <p class="eyebrow">Painel narrativo</p>
+            <h2>Selecione um ponto da história</h2>
+            <p>Passe o mouse para ver tooltips rápidos ou clique em um evento para destacar suas conexões diretas e ler o papel dramático dele na escaleta.</p>
+        </aside>
+
+        <div id="tooltip" class="tooltip" role="tooltip"></div>
     </main>
 
-    <footer class="bottom-panel">
+    <footer class="bottombar">
         <div class="legend" id="legend"></div>
-        <div class="detail" id="detail">
-            <strong>Escaleta reanalisada.</strong> A timeline agora inclui origem de Julian/Kael/Silas, linhas independentes, cerco, laboratório, Fogo Eterno, bio-transmissor, selo e cena final.
-        </div>
+        <div>Zoom: <span id="scaleReadout">100%</span></div>
     </footer>
+</div>
 
-    <script>
-        const lanes = [
-            { id: "origem", label: "Origem e ritual", color: "#e8c547" },
-            { id: "kael", label: "Kael jovem", color: "#ff6b6b" },
-            { id: "silas", label: "Silas / Julian", color: "#c084fc" },
-            { id: "elara", label: "Elara / Hera", color: "#5cc8ff" },
-            { id: "arthur", label: "Arthur / governo", color: "#f59e0b" },
-            { id: "mara", label: "Mara", color: "#fb7185" },
-            { id: "culto", label: "Culto e sistema", color: "#34d399" },
-            { id: "tempo", label: "Linhas temporais", color: "#8b9dff" },
-            { id: "desfecho", label: "Selo e legado", color: "#94a3b8" }
-        ];
+<script>
+(function () {
+    const lanes = [
+        { id: "origem", label: "Origem", color: "#ff4d6d", hint: "feridas fundadoras" },
+        { id: "personagens", label: "Personagens", color: "#00f5d4", hint: "Elara, Kael, Silas, Mara" },
+        { id: "culto", label: "Culto", color: "#00bbf9", hint: "rituais, governo e cerco" },
+        { id: "tempo", label: "Linhas Temporais", color: "#b5179e", hint: "loops, paradoxos e cruzamentos" },
+        { id: "legado", label: "Legado", color: "#83c5be", hint: "plano final e selo" }
+    ];
 
-        const acts = [
-            { id: "prologo", label: "Prólogo cronológico" },
-            { id: "ato1", label: "Ato 1 - Caos e encontro" },
-            { id: "ato2", label: "Ato 2 - Revelações e cerco" },
-            { id: "silas", label: "Jornada de Silas" },
-            { id: "ato3", label: "Ato 3 - Retorno ao presente" },
-            { id: "ato4", label: "Ato 4 - Legado e selo" },
-            { id: "final", label: "Cena final" }
-        ];
+    const acts = [
+        { id: "prologo", label: "Prólogo", subtitle: "a ferida original" },
+        { id: "ato1", label: "Ato 1", subtitle: "caos e encontro" },
+        { id: "ato2", label: "Ato 2", subtitle: "revelações e cerco" },
+        { id: "interludio", label: "Jornada de Silas", subtitle: "linhas independentes" },
+        { id: "ato3", label: "Ato 3", subtitle: "retorno ao presente" },
+        { id: "ato4", label: "Ato 4", subtitle: "legado e selo" },
+        { id: "final", label: "Final", subtitle: "normalidade protegida" }
+    ];
 
-        const events = [
-            { id: "julian-lorena", act: "prologo", lane: "origem", title: "Julian é separado de Lorena", beat: "Origem", detail: "Julian é arrancado da mãe em um centro de detenção de imigração e colocado no circuito de agentes ligados ao governo.", tags: "Lorena, tráfico, governo" },
-            { id: "julian-kael", act: "prologo", lane: "origem", title: "Rebatizado como Kael", beat: "Ritual", detail: "O culto transforma Julian em Kael e o submete a experimentos para despertar seus poderes.", tags: "culto, identidade, experimento" },
-            { id: "morte-mae", act: "prologo", lane: "origem", title: "Morte da mãe e fogo", beat: "Trauma", detail: "Ao presenciar a morte da mãe pelo culto, Kael ativa os poderes de fogo e faz sua primeira viagem temporal.", tags: "Lorena, fogo, primeira viagem" },
-            { id: "primeira-viagem", act: "prologo", lane: "tempo", title: "Primeira tentativa de voltar", beat: "Tempo", detail: "Kael tenta encontrar uma versão mais jovem de si mesmo para impedir Arthur e evitar o próprio sofrimento.", tags: "viagem temporal, paradoxo" },
-            { id: "silas-infiltra", act: "prologo", lane: "silas", title: "Silas se infiltra no culto", beat: "Máscara", detail: "Adulto, ele assume o nome Silas e finge saber rastrear anjos para trabalhar perto de Arthur.", tags: "Silas, Arthur, anjos" },
-            { id: "emma-cobaia", act: "prologo", lane: "arthur", title: "Emma vira pista e cobaia", beat: "Arthur", detail: "Silas descobre que Emma, esposa de Arthur, pode ser um anjo e observa sua transformação em experimento.", tags: "Emma, Arthur, culto" },
-            { id: "silas-mata-arthur", act: "prologo", lane: "tempo", title: "Silas mata Arthur em outra linha", beat: "Desvio", detail: "Em uma linha anterior, Silas mata Arthur para salvar a filha dele. O choque reativa o poder e empurra Silas de volta ao ponto da morte da mãe.", tags: "linha alternativa, reinício" },
-            { id: "reinicio-silas", act: "prologo", lane: "tempo", title: "Reinício na morte de Lorena", beat: "Loop", detail: "Silas percebe que o retorno não apaga tudo de forma simples. As linhas temporais começam a se revelar independentes.", tags: "loop, independência cronal" },
-            { id: "fuga-kael", act: "ato1", lane: "kael", title: "Kael foge da casa em chamas", beat: "A fuga", detail: "O jovem Kael escapa da casa de campo em chamas e encontra a cidade entrando em uma falsa epidemia.", tags: "incêndio, fuga, epidemia" },
-            { id: "omega", act: "ato1", lane: "mara", title: "Frequência Ômega", beat: "Pânico", detail: "Mara sabota transmissões de rádio, causa náuseas coletivas e cria o pânico que Arthur usa como pretexto.", tags: "rádio, sabotagem, náusea" },
-            { id: "missao-arthur", act: "ato1", lane: "arthur", title: "Arthur e Silas assumem a crise", beat: "Quarentena", detail: "Arthur Vane e Silas são encarregados de gerir a epidemia falsa e rastrear a terrorista Mara.", tags: "quarentena, governo, Silas" },
-            { id: "rastro-mara", act: "ato1", lane: "mara", title: "O rastro de Mara", beat: "Ataque", detail: "Mara incendeia um prédio, deixa um corpo com chips de agentes e usa túneis secretos do culto para desaparecer.", tags: "chips, túneis, ritual" },
-            { id: "festa-elara", act: "ato1", lane: "elara", title: "A festa de Elara", beat: "Casa", detail: "Elara está com Bia quando os amigos chegam. A TV antiga aparece como lembrança de família e futuro ponto de tecnologia ritual.", tags: "Bia, TV, festa" },
-            { id: "infiltracao-kael", act: "ato1", lane: "kael", title: "Kael se infiltra na festa", beat: "Encontro", detail: "Kael entra pelos fundos e tenta se misturar para se aproximar de Elara.", tags: "festa, aproximação" },
-            { id: "hospital", act: "ato1", lane: "kael", title: "Hospital em paralelo", beat: "Flashback", detail: "Kael é levado ao hospital, usa o celular de uma enfermeira para pesquisar rituais e recebe a visita de Silas.", tags: "hospital, pesquisa, Silas" },
-            { id: "fita1", act: "ato1", lane: "elara", title: "Primeira fita VHS", beat: "Lua de Mel", detail: "Bia encontra a fita 'Arthur e Emma Lua de Mel'. Elara assiste e descobre o primeiro nível do ritual.", tags: "Bia, Arthur, Emma, ritual" },
-            { id: "plano-vinganca", act: "ato2", lane: "silas", title: "Silas propõe a vingança", beat: "Plano", detail: "Silas diz a Kael que ele deve usar Elara para chegar a Arthur, e revela que Mara também observa os movimentos deles.", tags: "manipulação, Arthur, Mara" },
-            { id: "estase", act: "ato2", lane: "mara", title: "Esculturas de Estase", beat: "Terror", detail: "Mara encena mortes como paródia das fitas VHS e deixa objetos de Emma nos locais para quebrar Arthur psicologicamente.", tags: "Emma, paranoia, VHS" },
-            { id: "aviso-mara", act: "ato2", lane: "mara", title: "Mara avisa Elara", beat: "Confronto", detail: "Mara já havia alertado Elara de que Kael se aproximaria. A notícia da prisão de Mara sai nos jornais, embaralhando suspeitas.", tags: "Elara, jornais, suspeita" },
-            { id: "fita2", act: "ato2", lane: "elara", title: "Fita 2: FASE 2", beat: "Entrega", detail: "A segunda fita chega pela portinha do gato, dentro da própria casa de Elara.", tags: "FASE 2, casa, fita" },
-            { id: "ruptura", act: "ato2", lane: "elara", title: "Elara rompe com a normalidade", beat: "Ruptura", detail: "Elara e Kael passam mal ao ver a fita. Ela liga Kael ao culto, expulsa os convidados e o mantém sob mira de arma.", tags: "arma, convidados, culto" },
-            { id: "video-elara", act: "ato2", lane: "arthur", title: "Arthur recebe o vídeo", beat: "Cerco", detail: "Mara envia a Arthur um vídeo de Elara dormindo, filmado de dentro da casa. O medo dele dispara o cerco total.", tags: "vídeo, pânico, Elara" },
-            { id: "isolamento", act: "ato2", lane: "culto", title: "Casa isolada em plástico", beat: "Operação", detail: "Polícia e exército cercam a casa com helicópteros e uma cortina plástica de zona contaminada.", tags: "exército, quarentena, plástico" },
-            { id: "arma-sonica", act: "ato2", lane: "culto", title: "Arma sônica ativa", beat: "Colapso", detail: "Líquidos tremem, luz vermelha invade a casa, uma onda sonora derruba todos e a energia acaba.", tags: "som, transe, blackout" },
-            { id: "ruinas-silas", act: "silas", lane: "tempo", title: "Silas observa as ruínas", beat: "Prova", detail: "Meses depois, Silas observa a casa de campo queimar novamente e vê Elara saindo das chamas.", tags: "ruínas, incêndio, Elara" },
-            { id: "hera-nome", act: "silas", lane: "elara", title: "Elara revela ser Hera", beat: "Identidade", detail: "Ela não entende como Silas está vivo, pois diz tê-lo matado logo após matar Arthur. Seu nome verdadeiro é Hera.", tags: "Hera, nome verdadeiro, linha independente" },
-            { id: "linhas-independentes", act: "silas", lane: "tempo", title: "Teoria das linhas independentes", beat: "Cronologia", detail: "Silas conclui que as linhas não se substituem uma à outra. Elas coexistem, se cruzam e deixam sobreviventes deslocados.", tags: "linhas temporais, coexistência" },
-            { id: "prova-fogo", act: "silas", lane: "silas", title: "A prova pelo fogo", beat: "Salto", detail: "Silas entra nas chamas antes que se apaguem e viaja para uma linha um pouco mais no passado, esperando o incêndio se repetir.", tags: "fogo, salto, comprovação" },
-            { id: "despertar", act: "ato3", lane: "kael", title: "Kael acorda depois do ataque", beat: "Despertar", detail: "Kael desperta e encontra Elara flutuando em transe, presa a um feixe laranja e nomes emitidos por microfones.", tags: "transe, ritual remoto, nomes" },
-            { id: "ritual-distancia", act: "ato3", lane: "elara", title: "Ritual à distância", beat: "Ameaça", detail: "Kael puxa Elara de volta. Ele entende que tentam iniciar o ritual nela sem tocá-la.", tags: "Elara, ritual remoto" },
-            { id: "saida-subterranea", act: "ato3", lane: "elara", title: "Quarto do pânico", beat: "Fuga", detail: "Elara lembra que a casa deve ter quarto do pânico e uma saída subterrânea escondida.", tags: "passagem, casa, fuga" },
-            { id: "laboratorio", act: "ato3", lane: "culto", title: "Laboratório subterrâneo", beat: "Descoberta", detail: "Elara e Kael encontram um laboratório nos corredores sob a casa.", tags: "laboratório, túneis" },
-            { id: "separacao", act: "ato3", lane: "kael", title: "Elara e Kael se separam", beat: "Divisão", detail: "A separação abre espaço para a armadilha de Mara e para Elara encontrar Hera.", tags: "separação, armadilha" },
-            { id: "tunel-silas", act: "ato3", lane: "silas", title: "Kael encontra Silas no túnel", beat: "Armadilha", detail: "Sob efeito das armas térmicas, Kael e Silas se encontram. Mara surge com Elara no celular pedindo instruções do laboratório.", tags: "túnel, Mara, celular" },
-            { id: "desligamento", act: "ato3", lane: "silas", title: "Silas guia Elara", beat: "Sistema", detail: "Silas instrui Elara a desligar armas térmicas e rastreadores. O perigo militar cede, mas Mara assume o controle.", tags: "rastreadores, armas térmicas" },
-            { id: "morte-silas", act: "ato3", lane: "mara", title: "Mara executa Silas", beat: "Sacrifício", detail: "Mara atira no peito de Silas diante de Kael e sequestra o jovem para levá-lo à casa de campo.", tags: "Silas, Kael, casa de campo" },
-            { id: "encontro-hera", act: "ato3", lane: "elara", title: "Elara encontra Hera", beat: "Espelho", detail: "Elara confronta sua versão velha em um encontro psicológico devastador.", tags: "Hera, futuro, confronto" },
-            { id: "ads", act: "ato3", lane: "arthur", title: "ADS cria o incêndio invisível", beat: "Calor", detail: "Armas de energia de calor direcionada fazem o ar vibrar e o plástico derreter, criando um incêndio invisível.", tags: "ADS, calor, plástico" },
-            { id: "sacrificio-hera", act: "ato3", lane: "elara", title: "Hera se sacrifica", beat: "Empurrão", detail: "Hera revela que só o núcleo resfriado por nitrogênio é seguro e força Elara a voltar ao laboratório.", tags: "nitrogênio, sacrifício, Arthur" },
-            { id: "bunker", act: "ato3", lane: "arthur", title: "Arthur no bunker", beat: "Criador", detail: "Arthur observa a limpeza militar de uma câmara blindada com isolamento térmico, acreditando estar intocável.", tags: "bunker, monitores, limpeza" },
-            { id: "morte-arthur", act: "ato3", lane: "elara", title: "Elara mata Arthur", beat: "Execução", detail: "Com acessos de Hera e Silas, Elara desativa o resfriamento da câmara e redireciona o calor externo para Arthur.", tags: "hipertermia, pai, vingança" },
-            { id: "fogo-eterno", act: "ato3", lane: "tempo", title: "Mara tenta o Fogo Eterno", beat: "Traição temporal", detail: "Mara quer levar o jovem Kael para dentro do Fogo Eterno para apagar sua existência e purificar a linha.", tags: "Mara, Kael, Fogo Eterno" },
-            { id: "quebra-ciclo", act: "ato3", lane: "elara", title: "Elara quebra o ciclo", beat: "Escolha", detail: "Elara atira em Mara e depois em Kael antes que entrem nas chamas, rompendo a interferência entre passado e futuro.", tags: "ciclo, tiro, ruptura" },
-            { id: "mapa-centro", act: "ato4", lane: "desfecho", title: "O mapa está no centro", beat: "Pista", detail: "Depois das mortes, Elara encontra no corpo de Silas a mensagem que aponta para o arquivo físico escondido nele.", tags: "Silas, corpo, pista" },
-            { id: "osteodigital", act: "ato4", lane: "desfecho", title: "Arquivo osteo-digital", beat: "Incisão", detail: "Elara faz uma incisão bruta no peito de Silas e encontra códigos gravados a laser na caixa torácica e na coluna.", tags: "ossos, códigos, A24" },
-            { id: "bio-transmissor", act: "ato4", lane: "desfecho", title: "Bio-transmissor na vértebra", beat: "Dispositivo", detail: "Uma vértebra sintética contém o banco de dados roubado. Conectada à TV dos anos 90, libera a rede do culto.", tags: "TV, vértebra, banco de dados" },
-            { id: "isca-cronal", act: "ato4", lane: "desfecho", title: "Isca cronal mundial", beat: "Plano", detail: "Elara hackeia sinalizadores e causa incêndios de baixa intensidade em locais de triagem para atrair líderes do culto.", tags: "Frequência Ômega, líderes, armadilha" },
-            { id: "selo", act: "ato4", lane: "desfecho", title: "Selo dimensional", beat: "Extermínio", detail: "Enquanto incinera líderes em seus galpões, Elara ativa o pulso final que sela esta dimensão contra viajantes temporais.", tags: "pulso, dimensão, culto" },
-            { id: "mara-proposito", act: "ato4", lane: "desfecho", title: "Elara assume Mara com propósito", beat: "Legado", detail: "Ela enterra Kael e Silas, aceita o fardo e vira o erro no sistema que caça o governo por anos.", tags: "identidade, mito urbano, governo" },
-            { id: "bar-final", act: "final", lane: "desfecho", title: "Bar com Bia", beat: "Normalidade", detail: "Anos depois, a epidemia acabou. Elara, marcada e mais velha, está com Bia em um bar. A TV está sem estática. Ela venceu.", tags: "Bia, normalidade, TV" }
-        ].map((event, index) => ({ ...event, order: index }));
+    const relationTypes = {
+        causality: { label: "causalidade", color: "#d2d6eb", dashed: false },
+        manipulation: { label: "manipulação", color: "#9b5de5", dashed: true },
+        temporal: { label: "paradoxo temporal", color: "#b5179e", dashed: true },
+        ritual: { label: "ritual", color: "#f15bb5", dashed: false },
+        tech: { label: "tecnologia/arma", color: "#fee440", dashed: false },
+        legacy: { label: "legado/selo", color: "#83c5be", dashed: true },
+        opposition: { label: "oposição/morte", color: "#ff4d6d", dashed: false }
+    };
 
-        const relations = [
-            { from: "morte-mae", to: "primeira-viagem", type: "time" },
-            { from: "silas-mata-arthur", to: "reinicio-silas", type: "time" },
-            { from: "reinicio-silas", to: "ruinas-silas", type: "time" },
-            { from: "hera-nome", to: "linhas-independentes", type: "time" },
-            { from: "prova-fogo", to: "silas-infiltra", type: "time" },
-            { from: "omega", to: "missao-arthur", type: "cause" },
-            { from: "missao-arthur", to: "rastro-mara", type: "pursuit" },
-            { from: "hospital", to: "plano-vinganca", type: "manipulation" },
-            { from: "plano-vinganca", to: "infiltracao-kael", type: "manipulation" },
-            { from: "fita1", to: "fita2", type: "ritual" },
-            { from: "fita2", to: "ruptura", type: "ritual" },
-            { from: "video-elara", to: "isolamento", type: "cause" },
-            { from: "isolamento", to: "arma-sonica", type: "cause" },
-            { from: "arma-sonica", to: "despertar", type: "cause" },
-            { from: "ritual-distancia", to: "laboratorio", type: "cause" },
-            { from: "tunel-silas", to: "desligamento", type: "cause" },
-            { from: "desligamento", to: "morte-silas", type: "cause" },
-            { from: "encontro-hera", to: "sacrificio-hera", type: "motivation" },
-            { from: "ads", to: "sacrificio-hera", type: "cause" },
-            { from: "sacrificio-hera", to: "morte-arthur", type: "motivation" },
-            { from: "morte-silas", to: "mapa-centro", type: "legacy" },
-            { from: "morte-arthur", to: "fogo-eterno", type: "cause" },
-            { from: "fogo-eterno", to: "quebra-ciclo", type: "time" },
-            { from: "quebra-ciclo", to: "selo", type: "legacy" },
-            { from: "bio-transmissor", to: "isca-cronal", type: "legacy" },
-            { from: "isca-cronal", to: "selo", type: "legacy" },
-            { from: "selo", to: "bar-final", type: "legacy" }
-        ];
+    const events = [
+        ev("p_sep", "prologo", "origem", "Separação de Lorena", "Julian é separado da mãe em um centro de detenção e traficado por agentes ligados a Arthur.", ["Julian", "Lorena", "Arthur"], "A identidade original é arrancada antes mesmo do ritual."),
+        ev("p_culto", "prologo", "culto", "Rebatismo como Kael", "O culto transforma Julian em Kael e o submete a experimentos para despertar poderes.", ["Culto", "Kael"], "O sistema cria a peça que depois tentará controlar."),
+        ev("p_morte", "prologo", "origem", "Morte de Lorena", "Kael presencia a morte da mãe; o trauma acende o fogo e torna possível o primeiro salto temporal.", ["Lorena", "Kael"], "Trauma fundador do ciclo de fogo."),
+        ev("p_viagem", "prologo", "tempo", "Primeira viagem temporal", "Kael viaja ao passado para impedir Arthur e encontrar uma versão mais jovem de si mesmo.", ["Kael", "Arthur"], "O desejo de cura se converte em interferência cronológica."),
 
-        const BASE_STEP = 248;
-        const CARD_WIDTH = 236;
-        const START_X = 70;
-        const LANES_Y = 132;
-        const LANE_HEIGHT = 134;
+        ev("a1_fuga", "ato1", "personagens", "A fuga da casa em chamas", "O jovem Kael escapa de uma casa de campo em chamas e encontra uma cidade tomada por pânico sanitário.", ["Kael"], "Entrada física do caos no presente da história."),
+        ev("a1_omega", "ato1", "culto", "Frequência Ômega", "Mara sabota transmissões de rádio, causando náuseas coletivas e pânico público.", ["Mara"], "A falsa epidemia nasce como arma psicológica."),
+        ev("a1_quarentena", "ato1", "culto", "Arthur declara quarentena", "Arthur Vane e Silas assumem a gestão da crise e a caça à suposta terrorista Mara.", ["Arthur", "Silas", "Mara"], "O governo converte medo em autorização para cercar e vigiar."),
+        ev("a1_rastro", "ato1", "culto", "Rastro de Mara", "Mara incendeia um prédio, deixa um corpo com chips de agentes e some pelos túneis secretos do culto.", ["Mara", "Governo", "Culto"], "Ela prova conhecer o ritual por ter sobrevivido a ele."),
+        ev("a1_festa", "ato1", "personagens", "Festa de Elara", "Elara recebe Bia e amigos em casa; a TV antiga aparece como lembrança de família.", ["Elara", "Bia"], "O cotidiano adolescente esconde o futuro dispositivo do selo."),
+        ev("a1_infiltra", "ato1", "personagens", "Kael se infiltra", "Kael entra pelos fundos da festa, observa Elara e tenta se misturar aos convidados.", ["Kael", "Elara"], "A aproximação afetiva começa contaminada por missão e mentira."),
+        ev("a1_hospital", "ato1", "tempo", "Hospital paralelo", "Durante a quarentena, Kael pesquisa rituais no celular de uma enfermeira e recebe a visita de Silas, seu eu adulto.", ["Kael", "Silas"], "A linha temporal dobra sobre o próprio protagonista."),
+        ev("a1_fita1", "ato1", "culto", "Primeira fita VHS", "Bia encontra a fita de Arthur e Emma; Elara assiste e descobre o primeiro nível do ritual.", ["Bia", "Elara", "Emma"], "A imagem doméstica vira portal para a violência ritual."),
 
-        const state = { search: "", act: "all", lane: "all", spacing: 1, selectedId: null };
-        const laneById = Object.fromEntries(lanes.map((lane, index) => [lane.id, { ...lane, index }]));
-        const actById = Object.fromEntries(acts.map(act => [act.id, act]));
-        const eventById = Object.fromEntries(events.map(event => [event.id, event]));
+        ev("a2_plano", "ato2", "personagens", "Plano de vingança de Silas", "Silas orienta Kael a usar Elara para chegar a Arthur e admite que Mara também observa os eventos.", ["Silas", "Kael", "Elara"], "Mentoria, manipulação e autopreservação se misturam."),
+        ev("a2_estase", "ato2", "culto", "Esculturas de Estase", "Mara encena mortes como paródias das fitas VHS e espalha objetos de Emma para quebrar Arthur.", ["Mara", "Arthur", "Emma"], "O terror psicológico perfura a fachada clínica de Arthur."),
+        ev("a2_aviso", "ato2", "personagens", "Aviso de Mara", "Mara antecipa a Elara que Kael tentará se aproximar, enquanto a prisão dela ganha os jornais.", ["Mara", "Elara", "Kael"], "A confiança entre Elara e Kael é sabotada antes de existir."),
+        ev("a2_fita2", "ato2", "culto", "Fita 2: FASE 2", "A segunda fita chega pela portinha do gato; Elara e Kael assistem e passam mal.", ["Elara", "Kael"], "O ritual deixa de ser registro e passa a agir sobre os corpos."),
+        ev("a2_ruptura", "ato2", "personagens", "Ruptura na festa", "Elara percebe a ligação de Kael com o culto, expulsa convidados e o mantém sob mira de arma.", ["Elara", "Kael"], "A casa deixa de ser festa e vira zona de ameaça íntima."),
+        ev("a2_video", "ato2", "culto", "Vídeo de Elara dormindo", "Mara envia a Arthur um vídeo gravado dentro da casa, provocando pânico e ordem de cerco total.", ["Mara", "Arthur", "Elara"], "A chantagem transforma proteção paterna em violência estatal."),
+        ev("a2_cerco", "ato2", "culto", "Cerco plástico e militar", "Polícia, exército e helicópteros isolam a casa como zona de contaminação.", ["Arthur", "Governo"], "A falsa epidemia ganha forma arquitetônica."),
+        ev("a2_sonica", "ato2", "culto", "Arma sônica", "Líquidos tremem, luz vermelha invade o ambiente e todos desmaiam quando a energia acaba.", ["Governo", "Elara", "Kael"], "A tecnologia prepara o ritual remoto."),
 
-        const shell = document.getElementById("timelineShell");
-        const stage = document.getElementById("timelineStage");
-        const axis = document.getElementById("axis");
-        const lanesEl = document.getElementById("lanes");
-        const cardsEl = document.getElementById("cards");
-        const linksEl = document.getElementById("links");
-        const actMarkersEl = document.getElementById("actMarkers");
-        const detailEl = document.getElementById("detail");
-        const searchInput = document.getElementById("searchInput");
-        const actFilter = document.getElementById("actFilter");
-        const laneFilter = document.getElementById("laneFilter");
-        const spacingSlider = document.getElementById("spacingSlider");
-        const spacingValue = document.getElementById("spacingValue");
+        ev("i_loop", "interludio", "tempo", "Loop de Silas", "Silas mata Arthur em outra linha, salva a filha dele e reinicia no momento da morte de Lorena.", ["Silas", "Arthur"], "A vitória local não encerra o mecanismo temporal."),
+        ev("i_casa", "interludio", "tempo", "Casa de campo recorrente", "Meses depois, Silas vê a casa pegar fogo novamente e encontra Elara saindo das chamas.", ["Silas", "Elara"], "O incêndio funciona como cruzamento entre dimensões."),
+        ev("i_hera", "interludio", "personagens", "Elara revela ser Hera", "Ela diz que matou Silas após matar Arthur e revela que seu nome verdadeiro é Hera.", ["Hera", "Silas"], "Duas memórias incompatíveis coexistem no mesmo espaço."),
+        ev("i_linhas", "interludio", "tempo", "Independência cronal", "Silas deduz que as linhas temporais são independentes: elas se cruzam, mas não se apagam automaticamente.", ["Silas"], "Regra dramática que torna o selo necessário."),
+        ev("i_prova", "interludio", "tempo", "Prova pelo fogo", "Silas corre para dentro do fogo e espera o incêndio repetir antes de encontrar outro eu.", ["Silas"], "A teoria vira método de navegação entre linhas."),
 
-        function eventX(event) {
-            return START_X + event.order * BASE_STEP * state.spacing;
-        }
+        ev("a3_transe", "ato3", "personagens", "Elara em transe", "Kael acorda após a arma sônica e vê Elara flutuando diante de luz laranja e nomes em microfones.", ["Kael", "Elara"], "O ritual remoto tenta iniciar Elara à distância."),
+        ev("a3_panico", "ato3", "personagens", "Quarto do pânico", "Elara lembra de uma possível saída subterrânea escondida na casa.", ["Elara", "Kael"], "A fuga desce para a anatomia secreta da casa."),
+        ev("a3_lab", "ato3", "culto", "Laboratório subterrâneo", "Elara e Kael encontram um laboratório nos corredores sob a casa.", ["Elara", "Kael", "Culto"], "O lar revela sua infraestrutura ritual e militar."),
+        ev("a3_separa", "ato3", "personagens", "Separação", "Elara e Kael se separam dentro dos túneis e laboratórios.", ["Elara", "Kael"], "A fragmentação abre espaço para emboscadas paralelas."),
+        ev("a3_tunel", "ato3", "tempo", "Reencontro no túnel", "Kael encontra Silas sob efeito das armas térmicas; Mara surge com Elara no telefone.", ["Kael", "Silas", "Mara"], "Passado, futuro e vingança ficam no mesmo corredor."),
+        ev("a3_desliga", "ato3", "culto", "Desligamento das armas", "Silas instrui Elara a desligar armas térmicas e rastreadores pelo laboratório.", ["Silas", "Elara"], "O perigo militar recua, mas a armadilha de Mara começa."),
+        ev("a3_morte_silas", "ato3", "personagens", "Execução de Silas", "Mara atira no peito de Silas diante de Kael e sequestra o jovem para a casa de campo.", ["Mara", "Silas", "Kael"], "A morte ativa o plano de contingência deixado no corpo."),
+        ev("a3_hera", "ato3", "tempo", "Encontro com Hera", "Elara encontra sua versão velha em um confronto psicológico devastador.", ["Elara", "Hera"], "A protagonista encara o custo futuro de sobreviver."),
+        ev("a3_ads", "ato3", "culto", "Incêndio invisível", "Armas ADS aquecem o ar, derretem o plástico da quarentena e bloqueiam as saídas.", ["Governo", "Arthur"], "Arthur tenta cozinhar a casa para apagar evidências."),
+        ev("a3_nucleo", "ato3", "legado", "Núcleo frio", "Hera revela que o laboratório resfriado por nitrogênio é o único refúgio e se sacrifica.", ["Hera", "Elara"], "O sacrifício empurra Elara de volta ao centro do sistema."),
+        ev("a3_arthur", "ato3", "personagens", "Morte de Arthur", "Elara inverte o resfriamento do bunker e redireciona a energia térmica para dentro da câmara do pai.", ["Elara", "Arthur"], "O criador morre dentro da própria pira tecnológica."),
+        ev("a3_fogo", "ato3", "tempo", "Fogo Eterno", "Mara tenta levar Kael para dentro do fogo para apagar a existência dele e purificar a linha.", ["Mara", "Kael"], "A solução de Mara perpetuaria a interferência temporal."),
+        ev("a3_quebra", "ato3", "tempo", "Quebra do ciclo", "Elara trai o plano de sua versão futura: atira em Mara e depois em Kael antes que entrem nas chamas.", ["Elara", "Mara", "Kael"], "A linha deixa de tentar corrigir o passado e passa a selar o presente."),
 
-        function eventY(event) {
-            return LANES_Y + laneById[event.lane].index * LANE_HEIGHT + 24;
-        }
+        ev("a4_mapa", "ato4", "legado", "Mapa no centro", "No corpo de Silas, Elara encontra a mensagem: o mapa está no centro.", ["Elara", "Silas"], "A carne morta de Silas vira arquivo e bússola."),
+        ev("a4_ossos", "ato4", "legado", "Arquivo osteo-digital", "Elara realiza uma incisão brutal e encontra códigos gravados a laser na caixa torácica e coluna.", ["Elara", "Silas"], "O horror corporal entrega a rede mundial do culto."),
+        ev("a4_bio", "ato4", "legado", "Bio-transmissor", "Uma vértebra sintética contém o banco de dados roubado e se conecta à TV dos anos 90.", ["TV", "Silas", "Culto"], "O objeto doméstico vira terminal de guerra."),
+        ev("a4_isca", "ato4", "legado", "Ponto de Extermínio", "Elara hackeia sinalizadores do culto e cria incêndios de baixa intensidade para atrair líderes.", ["Elara", "Culto"], "A Frequência Ômega é reaproveitada como isca cronal."),
+        ev("a4_selo", "ato4", "legado", "Selo dimensional", "Ao incinerar líderes do culto, Elara ativa um pulso que estica a realidade e sela a dimensão.", ["Elara", "Culto"], "A história deixa de buscar vingança e ganha contenção metafísica."),
+        ev("a4_mara", "ato4", "legado", "Mara com propósito", "Elara enterra Kael e Silas, assume o nome Mara e caça o governo como mito urbano.", ["Elara", "Mara"], "Ela herda o erro no sistema, agora com direção moral."),
 
-        function escapeText(value) {
-            return String(value)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;");
-        }
+        ev("f_salto", "final", "legado", "Salto temporal", "Anos depois, a falsa epidemia acabou e o culto desapareceu das notícias.", ["Elara"], "O mundo voltou ao normal porque alguém ficou fora dele."),
+        ev("f_bar", "final", "personagens", "Bar com Bia", "Elara, mais velha e marcada por queimadura, encontra Bia em uma conversa banal e geracional.", ["Elara", "Bia"], "A leveza de Bia mede o peso que Elara carrega em silêncio."),
+        ev("f_tv", "final", "legado", "TV sem estática", "A TV dos anos 90 permanece como guia e prova de que a dimensão foi selada.", ["Elara", "TV"], "O selo não apaga a memória; apenas impede novas invasões."),
+    ];
 
-        function eventMatches(event) {
-            const haystack = `${event.title} ${event.beat} ${event.detail} ${event.tags} ${actById[event.act].label} ${laneById[event.lane].label}`.toLowerCase();
-            return (!state.search || haystack.includes(state.search))
-                && (state.act === "all" || event.act === state.act)
-                && (state.lane === "all" || event.lane === state.lane);
-        }
+    const connections = [
+        link("p_sep", "p_culto", "tráfico alimenta o culto", "causality"),
+        link("p_culto", "p_morte", "experimento culmina no trauma", "ritual"),
+        link("p_morte", "p_viagem", "fogo desperta salto", "temporal"),
+        link("p_viagem", "a1_hospital", "Kael encontra seu futuro", "temporal"),
+        link("a1_omega", "a1_quarentena", "pânico vira pretexto", "causality"),
+        link("a1_quarentena", "a2_cerco", "controle escala", "causality"),
+        link("a1_rastro", "a2_estase", "Mara encena o terror", "manipulation"),
+        link("a1_festa", "a1_infiltra", "aproximação de Kael", "manipulation"),
+        link("a1_fita1", "a2_fita2", "fase seguinte", "ritual"),
+        link("a1_hospital", "a2_plano", "Silas orienta Kael", "temporal"),
+        link("a2_plano", "a1_infiltra", "usar Elara", "manipulation"),
+        link("a2_estase", "a2_video", "Arthur entra em paranoia", "manipulation"),
+        link("a2_aviso", "a2_ruptura", "confiança sabotada", "manipulation"),
+        link("a2_fita2", "a2_ruptura", "corpos denunciam culto", "ritual"),
+        link("a2_video", "a2_cerco", "pânico paterno", "manipulation"),
+        link("a2_cerco", "a2_sonica", "ataque tecnológico", "tech"),
+        link("a2_sonica", "a3_transe", "abre ritual remoto", "ritual"),
+        link("a3_transe", "a3_panico", "busca saída", "causality"),
+        link("a3_panico", "a3_lab", "descida subterrânea", "causality"),
+        link("a3_lab", "a3_tunel", "rede conecta os duplos", "temporal"),
+        link("a3_tunel", "a3_desliga", "telefone guia Elara", "tech"),
+        link("a3_desliga", "a3_morte_silas", "fim do perigo militar", "manipulation"),
+        link("a3_morte_silas", "a4_mapa", "plano de contingência", "legacy"),
+        link("a3_ads", "a3_hera", "calor força revelação", "causality"),
+        link("a3_hera", "a3_nucleo", "sacrifício e refúgio", "legacy"),
+        link("a3_nucleo", "a3_arthur", "Elara retorna ao sistema", "causality"),
+        link("a3_lab", "a3_arthur", "controle do bunker", "tech"),
+        link("a3_morte_silas", "a3_fogo", "Mara leva Kael", "temporal"),
+        link("a3_fogo", "a3_quebra", "impedir apagamento", "temporal"),
+        link("a3_arthur", "a3_quebra", "fim do criador libera decisão", "opposition"),
+        link("i_loop", "i_casa", "incêndio reaparece", "temporal"),
+        link("i_casa", "i_hera", "Hera sai das chamas", "temporal"),
+        link("i_hera", "i_linhas", "prova viva", "temporal"),
+        link("i_linhas", "i_prova", "teoria testada", "temporal"),
+        link("i_linhas", "a3_quebra", "regra exige ruptura", "temporal"),
+        link("a4_mapa", "a4_ossos", "mensagem leva aos códigos", "legacy"),
+        link("a4_ossos", "a4_bio", "vértebra sintética", "legacy"),
+        link("a4_bio", "a4_isca", "hackeia sinalizadores", "tech"),
+        link("a4_isca", "a4_selo", "atrai líderes", "manipulation"),
+        link("a4_selo", "a4_mara", "fardo assumido", "legacy"),
+        link("a4_mara", "f_salto", "anos de caça", "legacy"),
+        link("f_salto", "f_bar", "normalidade estranha", "causality"),
+        link("a4_bio", "f_tv", "TV como guia", "legacy"),
+        link("a4_selo", "f_tv", "mundo sem estática", "legacy")
+    ];
 
-        function relationColor(type) {
-            if (type === "time") return "#8b9dff";
-            if (type === "manipulation") return "#ff6b6b";
-            if (type === "ritual") return "#34d399";
-            if (type === "legacy") return "#f4b35e";
-            if (type === "motivation") return "#5cc8ff";
-            return "rgba(255,255,255,0.34)";
-        }
+    const state = {
+        scale: 0.78,
+        x: 28,
+        y: 24,
+        activeLanes: new Set(lanes.map(lane => lane.id)),
+        activeRelations: new Set(Object.keys(relationTypes)),
+        query: "",
+        selectedId: null,
+        positions: new Map(),
+        actBounds: new Map(),
+        worldWidth: 1000,
+        worldHeight: 1000
+    };
 
-        function relatedIdsFor(id) {
-            const ids = new Set([id]);
-            relations.forEach(relation => {
-                if (relation.from === id) ids.add(relation.to);
-                if (relation.to === id) ids.add(relation.from);
-            });
-            return ids;
-        }
+    const dom = {
+        viewport: document.getElementById("viewport"),
+        world: document.getElementById("world"),
+        actLayer: document.getElementById("actLayer"),
+        laneLayer: document.getElementById("laneLayer"),
+        eventLayer: document.getElementById("eventLayer"),
+        connections: document.getElementById("connections"),
+        laneFilters: document.getElementById("laneFilters"),
+        relationFilters: document.getElementById("relationFilters"),
+        legend: document.getElementById("legend"),
+        searchInput: document.getElementById("searchInput"),
+        clearSearch: document.getElementById("clearSearch"),
+        searchResults: document.getElementById("searchResults"),
+        eventSelect: document.getElementById("eventSelect"),
+        centerSelected: document.getElementById("centerSelected"),
+        zoomOut: document.getElementById("zoomOut"),
+        zoomIn: document.getElementById("zoomIn"),
+        fitStory: document.getElementById("fitStory"),
+        tooltip: document.getElementById("tooltip"),
+        detailPanel: document.getElementById("detailPanel"),
+        scaleReadout: document.getElementById("scaleReadout")
+    };
 
-        function renderFilters() {
-            acts.forEach(act => {
-                const option = document.createElement("option");
-                option.value = act.id;
-                option.textContent = act.label;
-                actFilter.appendChild(option);
-            });
+    function ev(id, act, lane, title, summary, tags, consequence) {
+        return { id, act, lane, title, summary, tags, consequence };
+    }
 
-            lanes.forEach(lane => {
-                const option = document.createElement("option");
-                option.value = lane.id;
-                option.textContent = lane.label;
-                laneFilter.appendChild(option);
-            });
-        }
+    function link(from, to, label, type) {
+        return { from, to, label, type };
+    }
 
-        function renderLegend() {
-            document.getElementById("legend").innerHTML = lanes.map(lane => `
-                <span class="legend-item" style="--group-color:${lane.color}">
-                    <span class="legend-swatch"></span>${escapeText(lane.label)}
-                </span>
-            `).join("");
-        }
+    function layout() {
+        const actPadding = 170;
+        const eventStep = 190;
+        const actGap = 90;
+        const laneTop = 118;
+        const laneHeight = 142;
+        const laneById = new Map(lanes.map((lane, index) => [lane.id, { ...lane, index }]));
+        let cursor = 90;
 
-        function renderLanes(width) {
-            lanesEl.innerHTML = "";
-            lanes.forEach((lane, index) => {
-                const laneEl = document.createElement("div");
-                laneEl.className = "lane";
-                laneEl.style.top = `${LANES_Y + index * LANE_HEIGHT}px`;
-                laneEl.style.width = `${width}px`;
-                laneEl.style.height = `${LANE_HEIGHT}px`;
-                laneEl.innerHTML = `<div class="lane-name">${escapeText(lane.label)}</div>`;
-                lanesEl.appendChild(laneEl);
-            });
-        }
-
-        function renderActMarkers() {
-            actMarkersEl.innerHTML = "";
-            acts.forEach(act => {
-                const first = events.find(event => event.act === act.id);
-                if (!first) return;
-                const marker = document.createElement("div");
-                marker.className = "act-marker";
-                marker.style.left = `${eventX(first)}px`;
-                marker.textContent = act.label;
-                actMarkersEl.appendChild(marker);
-            });
-        }
-
-        function renderLinks(visibleEvents) {
-            const visibleIds = new Set(visibleEvents.map(event => event.id));
-            const selectedRelated = state.selectedId ? relatedIdsFor(state.selectedId) : null;
-
-            linksEl.innerHTML = `
-                <defs>
-                    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
-                        <path d="M0,0 L9,4.5 L0,9 Z" fill="rgba(255,255,255,0.72)"></path>
-                    </marker>
-                </defs>
-            `;
-
-            relations.forEach(relation => {
-                if (!visibleIds.has(relation.from) || !visibleIds.has(relation.to)) return;
-                const from = eventById[relation.from];
-                const to = eventById[relation.to];
-                const fromX = eventX(from) + CARD_WIDTH;
-                const fromY = eventY(from) + 48;
-                const toX = eventX(to);
-                const toY = eventY(to) + 48;
-                const distance = Math.abs(toX - fromX);
-                const bend = Math.max(80, Math.min(distance * 0.35, 220));
-                const active = !selectedRelated || (selectedRelated.has(relation.from) && selectedRelated.has(relation.to));
-                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                path.setAttribute("d", `M ${fromX} ${fromY} C ${fromX + bend} ${fromY}, ${toX - bend} ${toY}, ${toX} ${toY}`);
-                path.setAttribute("fill", "none");
-                path.setAttribute("stroke", relationColor(relation.type));
-                path.setAttribute("stroke-width", active ? "2.4" : "1.3");
-                path.setAttribute("stroke-opacity", active ? "0.82" : "0.18");
-                path.setAttribute("marker-end", "url(#arrow)");
-                if (relation.type === "time" || relation.type === "manipulation") {
-                    path.setAttribute("stroke-dasharray", relation.type === "time" ? "7 7" : "3 6");
-                }
-                linksEl.appendChild(path);
-            });
-        }
-
-        function selectEvent(id) {
-            state.selectedId = id;
-            const selected = eventById[id];
-            const related = relatedIdsFor(id);
-            document.querySelectorAll(".event-card").forEach(card => {
-                const cardId = card.dataset.id;
-                card.classList.toggle("selected", cardId === id);
-                card.classList.toggle("related", cardId !== id && related.has(cardId));
-                card.classList.toggle("dim", !related.has(cardId));
-            });
-            detailEl.innerHTML = `
-                <strong>${escapeText(selected.title)}</strong><br>
-                ${escapeText(actById[selected.act].label)} | ${escapeText(laneById[selected.lane].label)} | ${escapeText(selected.beat)}<br>
-                ${escapeText(selected.detail)}
-            `;
-            renderLinks(events.filter(eventMatches));
-        }
-
-        function clearSelection() {
-            state.selectedId = null;
-            document.querySelectorAll(".event-card").forEach(card => card.classList.remove("selected", "related", "dim"));
-            detailEl.innerHTML = "<strong>Escaleta reanalisada.</strong> A timeline agora inclui origem de Julian/Kael/Silas, linhas independentes, cerco, laboratório, Fogo Eterno, bio-transmissor, selo e cena final.";
-            renderLinks(events.filter(eventMatches));
-        }
-
-        function renderCards(visibleEvents) {
-            cardsEl.innerHTML = "";
-            if (!visibleEvents.some(event => event.id === state.selectedId)) state.selectedId = null;
-            const related = state.selectedId ? relatedIdsFor(state.selectedId) : null;
-
-            visibleEvents.forEach(item => {
-                const lane = laneById[item.lane];
-                const card = document.createElement("article");
-                card.className = "event-card";
-                card.dataset.id = item.id;
-                card.style.left = `${eventX(item)}px`;
-                card.style.top = `${eventY(item)}px`;
-                card.style.setProperty("--group-color", lane.color);
-                if (related) {
-                    card.classList.toggle("selected", item.id === state.selectedId);
-                    card.classList.toggle("related", item.id !== state.selectedId && related.has(item.id));
-                    card.classList.toggle("dim", !related.has(item.id));
-                }
-                card.innerHTML = `
-                    <div class="event-kicker">
-                        <span>${escapeText(actById[item.act].label.split(" - ")[0])}</span>
-                        <span>${String(item.order + 1).padStart(2, "0")}</span>
-                    </div>
-                    <div class="event-title">${escapeText(item.title)}</div>
-                    <div class="event-desc">${escapeText(item.detail)}</div>
-                    <div class="event-tags">${escapeText(item.beat)} | ${escapeText(item.tags)}</div>
-                `;
-                card.addEventListener("click", eventClick => {
-                    eventClick.stopPropagation();
-                    selectEvent(item.id);
+        acts.forEach(act => {
+            const actEvents = events.filter(item => item.act === act.id);
+            const width = Math.max(860, actPadding * 2 + Math.max(0, actEvents.length - 1) * eventStep);
+            state.actBounds.set(act.id, { x: cursor, width });
+            actEvents.forEach((item, index) => {
+                const lane = laneById.get(item.lane);
+                const stagger = index % 2 === 0 ? -16 : 18;
+                state.positions.set(item.id, {
+                    x: cursor + actPadding + index * eventStep,
+                    y: laneTop + lane.index * laneHeight + laneHeight / 2 + stagger
                 });
-                cardsEl.appendChild(card);
             });
+            cursor += width + actGap;
+        });
+
+        state.worldWidth = cursor + 180;
+        state.worldHeight = laneTop + lanes.length * laneHeight + 120;
+        dom.world.style.width = `${state.worldWidth}px`;
+        dom.world.style.height = `${state.worldHeight}px`;
+        dom.connections.setAttribute("width", state.worldWidth);
+        dom.connections.setAttribute("height", state.worldHeight);
+        dom.connections.setAttribute("viewBox", `0 0 ${state.worldWidth} ${state.worldHeight}`);
+    }
+
+    function renderActsAndLanes() {
+        dom.actLayer.innerHTML = acts.map(act => {
+            const bounds = state.actBounds.get(act.id);
+            return `<section class="act-band" style="left:${bounds.x}px;width:${bounds.width}px"><div class="act-label"><strong>${act.label}</strong><span>${act.subtitle}</span></div></section>`;
+        }).join("");
+
+        dom.laneLayer.innerHTML = lanes.map((lane, index) => `
+            <section class="lane-row" style="top:${118 + index * 142}px;--lane-color:${lane.color}">
+                <div class="lane-label"><strong>${lane.label}</strong><span>${lane.hint}</span></div>
+            </section>
+        `).join("");
+    }
+
+    function renderEvents() {
+        const actNames = Object.fromEntries(acts.map(act => [act.id, act.label]));
+        const laneColors = Object.fromEntries(lanes.map(lane => [lane.id, lane.color]));
+        dom.eventLayer.innerHTML = events.map(item => {
+            const pos = state.positions.get(item.id);
+            return `
+                <article class="event-card" data-id="${item.id}" data-lane="${item.lane}" style="left:${pos.x}px;top:${pos.y}px;--event-color:${laneColors[item.lane]}">
+                    <div class="meta"><span>${actNames[item.act]}</span><span>${lanes.find(l => l.id === item.lane).label}</span></div>
+                    <h3>${item.title}</h3>
+                    <p>${item.summary}</p>
+                    <span class="dot"></span>
+                </article>
+            `;
+        }).join("");
+
+        dom.eventLayer.querySelectorAll(".event-card").forEach(card => {
+            const item = findEvent(card.dataset.id);
+            card.addEventListener("pointerenter", evt => showTooltip(item, evt));
+            card.addEventListener("pointermove", moveTooltip);
+            card.addEventListener("pointerleave", hideTooltip);
+            card.addEventListener("click", () => selectEvent(item.id, true));
+        });
+
+        dom.eventSelect.innerHTML = events.map(item => `<option value="${item.id}">${item.title}</option>`).join("");
+    }
+
+    function renderConnections() {
+        const defs = `<defs>${Object.entries(relationTypes).map(([id, type]) => `
+            <marker id="arrow-${id}" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L9,4.5 L0,9 Z" fill="${type.color}"></path>
+            </marker>
+        `).join("")}</defs>`;
+
+        const paths = connections.map((item, index) => {
+            const from = state.positions.get(item.from);
+            const to = state.positions.get(item.to);
+            const mid = Math.abs(to.x - from.x) * 0.36;
+            const lift = (index % 2 === 0 ? -1 : 1) * Math.min(70, 18 + Math.abs(to.y - from.y) * 0.18);
+            const c1 = `${from.x + mid},${from.y + lift}`;
+            const c2 = `${to.x - mid},${to.y - lift}`;
+            const d = `M ${from.x} ${from.y} C ${c1} ${c2} ${to.x} ${to.y}`;
+            const type = relationTypes[item.type];
+            return `<path class="connection-path ${item.type}" data-from="${item.from}" data-to="${item.to}" data-type="${item.type}" d="${d}" stroke="${type.color}" marker-end="url(#arrow-${item.type})"><title>${item.label}</title></path>`;
+        }).join("");
+
+        dom.connections.innerHTML = defs + paths;
+    }
+
+    function renderFilters() {
+        dom.laneFilters.innerHTML = lanes.map(lane => `
+            <label class="chip" style="--chip-color:${lane.color}"><input type="checkbox" value="${lane.id}" checked> ${lane.label}</label>
+        `).join("");
+        dom.relationFilters.innerHTML = Object.entries(relationTypes).map(([id, type]) => `
+            <label class="chip" style="--chip-color:${type.color}"><input type="checkbox" value="${id}" checked> ${type.label}</label>
+        `).join("");
+        dom.legend.innerHTML = Object.entries(relationTypes).map(([id, type]) => `
+            <span class="legend-item"><span class="legend-line ${type.dashed ? "dashed" : ""}" style="--legend-color:${type.color}"></span>${type.label}</span>
+        `).join("");
+
+        dom.laneFilters.addEventListener("change", () => {
+            state.activeLanes = checkedValues(dom.laneFilters);
+            applyFilters();
+        });
+        dom.relationFilters.addEventListener("change", () => {
+            state.activeRelations = checkedValues(dom.relationFilters);
+            applyFilters();
+        });
+    }
+
+    function applyFilters() {
+        const query = normalize(state.query);
+        const visibleIds = new Set();
+        events.forEach(item => {
+            const matchesLane = state.activeLanes.has(item.lane);
+            const haystack = normalize(`${item.title} ${item.summary} ${item.tags.join(" ")} ${item.consequence}`);
+            const matchesQuery = !query || haystack.includes(query);
+            const visible = matchesLane && matchesQuery;
+            const card = dom.eventLayer.querySelector(`[data-id="${item.id}"]`);
+            if (card) card.classList.toggle("is-dimmed", !visible);
+            if (visible) visibleIds.add(item.id);
+        });
+
+        dom.connections.querySelectorAll(".connection-path").forEach(path => {
+            const visible = visibleIds.has(path.dataset.from) && visibleIds.has(path.dataset.to) && state.activeRelations.has(path.dataset.type);
+            path.classList.toggle("hidden", !visible);
+        });
+
+        renderSearchResults(visibleIds);
+        if (state.selectedId) highlightConnections(state.selectedId);
+    }
+
+    function renderSearchResults(visibleIds) {
+        const query = normalize(state.query);
+        if (!query) {
+            dom.searchResults.classList.remove("visible");
+            dom.searchResults.innerHTML = "";
+            return;
         }
+        const resultItems = events.filter(item => visibleIds.has(item.id)).slice(0, 9);
+        dom.searchResults.innerHTML = resultItems.length
+            ? resultItems.map(item => `<button type="button" class="result-btn" data-id="${item.id}">${item.title}<small>${acts.find(a => a.id === item.act).label} · ${lanes.find(l => l.id === item.lane).label}</small></button>`).join("")
+            : `<span class="chip">Nenhum evento encontrado</span>`;
+        dom.searchResults.classList.add("visible");
+        dom.searchResults.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => selectEvent(btn.dataset.id, true)));
+    }
 
-        function render() {
-            const width = START_X * 2 + (events.length - 1) * BASE_STEP * state.spacing + CARD_WIDTH + 320;
-            const height = LANES_Y + lanes.length * LANE_HEIGHT + 80;
-            const visibleEvents = events.filter(eventMatches);
-            stage.style.width = `${width}px`;
-            stage.style.height = `${height}px`;
-            linksEl.setAttribute("width", width);
-            linksEl.setAttribute("height", height);
-            axis.style.left = `${START_X}px`;
-            axis.style.width = `${width - START_X * 2}px`;
-            spacingValue.textContent = `${Math.round(state.spacing * 100)}%`;
-            renderLanes(width);
-            renderActMarkers();
-            renderCards(visibleEvents);
-            renderLinks(visibleEvents);
-            if (state.selectedId && visibleEvents.some(event => event.id === state.selectedId)) selectEvent(state.selectedId);
-        }
+    function selectEvent(id, center) {
+        state.selectedId = id;
+        const item = findEvent(id);
+        dom.eventSelect.value = id;
+        dom.eventLayer.querySelectorAll(".event-card").forEach(card => card.classList.toggle("active", card.dataset.id === id));
+        highlightConnections(id);
+        updateDetailPanel(item);
+        if (center) centerEvent(id);
+    }
 
-        function centerOn(id) {
-            const item = eventById[id] || events[Math.floor(events.length / 2)];
-            shell.scrollTo({
-                left: Math.max(0, eventX(item) - shell.clientWidth / 2 + CARD_WIDTH / 2),
-                top: Math.max(0, eventY(item) - shell.clientHeight / 2 + 60),
-                behavior: "smooth"
-            });
-        }
-
-        searchInput.addEventListener("input", event => {
-            state.search = event.target.value.trim().toLowerCase();
-            render();
+    function highlightConnections(id) {
+        dom.connections.querySelectorAll(".connection-path").forEach(path => {
+            const linked = path.dataset.from === id || path.dataset.to === id;
+            path.classList.toggle("focus", linked && !path.classList.contains("hidden"));
         });
+    }
 
-        actFilter.addEventListener("change", event => {
-            state.act = event.target.value;
-            render();
-        });
+    function updateDetailPanel(item) {
+        const incoming = connections.filter(link => link.to === item.id);
+        const outgoing = connections.filter(link => link.from === item.id);
+        dom.detailPanel.classList.remove("empty");
+        dom.detailPanel.innerHTML = `
+            <p class="eyebrow">${acts.find(a => a.id === item.act).label} · ${lanes.find(l => l.id === item.lane).label}</p>
+            <h2>${item.title}</h2>
+            <p>${item.summary}</p>
+            <p><strong>Função dramática:</strong> ${item.consequence}</p>
+            <div class="pill-row">${item.tags.map(tag => `<span class="pill">${tag}</span>`).join("")}</div>
+            <p><strong>Entradas:</strong> ${incoming.length ? incoming.map(describeLink).join("; ") : "sem conexão direta filtrada"}.</p>
+            <p><strong>Saídas:</strong> ${outgoing.length ? outgoing.map(describeLink).join("; ") : "fim de ramificação"}.</p>
+            <div class="panel-actions">
+                <button type="button" id="panelCenter">Centralizar</button>
+                <button type="button" id="panelClear">Remover destaque</button>
+            </div>
+        `;
+        document.getElementById("panelCenter").addEventListener("click", () => centerEvent(item.id));
+        document.getElementById("panelClear").addEventListener("click", clearSelection);
+    }
 
-        laneFilter.addEventListener("change", event => {
-            state.lane = event.target.value;
-            render();
-        });
+    function describeLink(item) {
+        const otherId = state.selectedId === item.from ? item.to : item.from;
+        return `${relationTypes[item.type].label} com “${findEvent(otherId).title}” (${item.label})`;
+    }
 
-        spacingSlider.addEventListener("input", event => {
-            state.spacing = Number(event.target.value);
-            render();
-        });
+    function clearSelection() {
+        state.selectedId = null;
+        dom.eventLayer.querySelectorAll(".event-card").forEach(card => card.classList.remove("active"));
+        dom.connections.querySelectorAll(".connection-path").forEach(path => path.classList.remove("focus"));
+        dom.detailPanel.classList.add("empty");
+        dom.detailPanel.innerHTML = `<p class="eyebrow">Painel narrativo</p><h2>Selecione um ponto da história</h2><p>Passe o mouse para ver tooltips rápidos ou clique em um evento para destacar suas conexões diretas e ler o papel dramático dele na escaleta.</p>`;
+    }
 
-        document.getElementById("resetBtn").addEventListener("click", () => {
-            searchInput.value = "";
-            actFilter.value = "all";
-            laneFilter.value = "all";
-            spacingSlider.value = "1";
-            state.search = "";
-            state.act = "all";
-            state.lane = "all";
-            state.spacing = 1;
-            clearSelection();
-            render();
-            centerOn("arma-sonica");
-        });
+    function centerEvent(id) {
+        const pos = state.positions.get(id);
+        const rect = dom.viewport.getBoundingClientRect();
+        state.x = rect.width / 2 - pos.x * state.scale;
+        state.y = rect.height / 2 - pos.y * state.scale;
+        applyTransform();
+    }
 
-        shell.addEventListener("click", clearSelection);
+    function fitStory() {
+        const rect = dom.viewport.getBoundingClientRect();
+        const heightScale = (rect.height - 80) / state.worldHeight;
+        state.scale = clamp(heightScale, 0.52, 0.9);
+        state.x = 24;
+        state.y = Math.max(18, (rect.height - state.worldHeight * state.scale) / 2);
+        applyTransform();
+    }
 
+    function zoomAt(delta, cx, cy) {
+        const oldScale = state.scale;
+        const nextScale = clamp(state.scale * delta, 0.36, 1.55);
+        const rect = dom.viewport.getBoundingClientRect();
+        const px = cx ?? rect.width / 2;
+        const py = cy ?? rect.height / 2;
+        const worldX = (px - state.x) / oldScale;
+        const worldY = (py - state.y) / oldScale;
+        state.scale = nextScale;
+        state.x = px - worldX * nextScale;
+        state.y = py - worldY * nextScale;
+        applyTransform();
+    }
+
+    function applyTransform() {
+        dom.world.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})`;
+        dom.scaleReadout.textContent = `${Math.round(state.scale * 100)}%`;
+    }
+
+    function installNavigation() {
         let dragging = false;
-        let dragStartX = 0;
-        let dragStartY = 0;
-        let scrollStartLeft = 0;
-        let scrollStartTop = 0;
+        let start = null;
 
-        shell.addEventListener("mousedown", event => {
-            if (event.target.closest(".event-card, input, select, button")) return;
+        dom.viewport.addEventListener("pointerdown", evt => {
+            if (evt.target.closest(".event-card, button, input, select, label, .detail-panel")) return;
             dragging = true;
-            shell.classList.add("dragging");
-            dragStartX = event.clientX;
-            dragStartY = event.clientY;
-            scrollStartLeft = shell.scrollLeft;
-            scrollStartTop = shell.scrollTop;
+            start = { px: evt.clientX, py: evt.clientY, x: state.x, y: state.y };
+            dom.viewport.classList.add("dragging");
+            dom.viewport.setPointerCapture(evt.pointerId);
         });
-
-        window.addEventListener("mouseup", () => {
-            dragging = false;
-            shell.classList.remove("dragging");
-        });
-
-        window.addEventListener("mousemove", event => {
+        dom.viewport.addEventListener("pointermove", evt => {
             if (!dragging) return;
-            event.preventDefault();
-            shell.scrollLeft = scrollStartLeft - (event.clientX - dragStartX);
-            shell.scrollTop = scrollStartTop - (event.clientY - dragStartY);
+            state.x = start.x + evt.clientX - start.px;
+            state.y = start.y + evt.clientY - start.py;
+            applyTransform();
         });
+        dom.viewport.addEventListener("pointerup", endDrag);
+        dom.viewport.addEventListener("pointercancel", endDrag);
 
-        renderFilters();
-        renderLegend();
-        render();
-        setTimeout(() => centerOn("arma-sonica"), 80);
-    </script>
+        function endDrag() {
+            dragging = false;
+            dom.viewport.classList.remove("dragging");
+        }
+
+        dom.viewport.addEventListener("wheel", evt => {
+            evt.preventDefault();
+            const rect = dom.viewport.getBoundingClientRect();
+            const factor = evt.deltaY > 0 ? 0.92 : 1.09;
+            zoomAt(factor, evt.clientX - rect.left, evt.clientY - rect.top);
+        }, { passive: false });
+
+        dom.zoomIn.addEventListener("click", () => zoomAt(1.16));
+        dom.zoomOut.addEventListener("click", () => zoomAt(0.86));
+        dom.fitStory.addEventListener("click", fitStory);
+        dom.centerSelected.addEventListener("click", () => selectEvent(dom.eventSelect.value, true));
+        dom.eventSelect.addEventListener("change", () => selectEvent(dom.eventSelect.value, true));
+        window.addEventListener("resize", () => state.selectedId ? centerEvent(state.selectedId) : fitStory());
+    }
+
+    function installSearch() {
+        dom.searchInput.addEventListener("input", evt => {
+            state.query = evt.target.value;
+            applyFilters();
+        });
+        dom.searchInput.addEventListener("keydown", evt => {
+            if (evt.key !== "Enter") return;
+            const first = dom.searchResults.querySelector("button");
+            if (first) selectEvent(first.dataset.id, true);
+        });
+        dom.clearSearch.addEventListener("click", () => {
+            dom.searchInput.value = "";
+            state.query = "";
+            applyFilters();
+        });
+    }
+
+    function showTooltip(item, evt) {
+        dom.tooltip.innerHTML = `<strong>${item.title}</strong><span>${item.summary}<br><br><b>Função:</b> ${item.consequence}</span>`;
+        dom.tooltip.classList.add("visible");
+        moveTooltip(evt);
+    }
+
+    function moveTooltip(evt) {
+        const pad = 18;
+        const rect = dom.tooltip.getBoundingClientRect();
+        let left = evt.clientX + pad;
+        let top = evt.clientY + pad;
+        if (left + rect.width > window.innerWidth - 12) left = evt.clientX - rect.width - pad;
+        if (top + rect.height > window.innerHeight - 12) top = evt.clientY - rect.height - pad;
+        dom.tooltip.style.left = `${Math.max(12, left)}px`;
+        dom.tooltip.style.top = `${Math.max(12, top)}px`;
+    }
+
+    function hideTooltip() {
+        dom.tooltip.classList.remove("visible");
+    }
+
+    function checkedValues(root) {
+        return new Set(Array.from(root.querySelectorAll("input:checked")).map(input => input.value));
+    }
+
+    function findEvent(id) {
+        return events.find(item => item.id === id);
+    }
+
+    function normalize(value) {
+        return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    layout();
+    renderActsAndLanes();
+    renderConnections();
+    renderEvents();
+    renderFilters();
+    installNavigation();
+    installSearch();
+    applyFilters();
+    fitStory();
+})();
+</script>
 </body>
 </html>
