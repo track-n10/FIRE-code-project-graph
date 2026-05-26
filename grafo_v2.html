@@ -364,15 +364,14 @@
         if (!container || !filterGroup || !relationFilter || !legend || !status || !detailPanel) return;
 
         const groups = {
-            identity: { label: "Julian / Kael / Silas", color: "#ff4d6d" },
-            elara: { label: "Elara / Hera", color: "#00f5d4" },
-            arthur: { label: "Arthur / Governo", color: "#fbb02d" },
-            mara: { label: "Mara", color: "#9b5de5" },
-            cult: { label: "Culto / Sistema", color: "#00bbf9" },
-            ritual: { label: "Ritual", color: "#f15bb5" },
-            tech: { label: "Tecnologia / Armas", color: "#fee440" },
-            time: { label: "Linhas temporais", color: "#b5179e" },
-            legacy: { label: "Legado / Selo", color: "#83c5be" },
+            personagem: { label: "Personagem", color: "#00f5d4" },
+            organizacao: { label: "Organização / Sistema", color: "#00bbf9" },
+            evento: { label: "Evento Narrativo", color: "#ffbf69" },
+            artefato: { label: "Artefato / Tecnologia", color: "#fee440" },
+            ritual: { label: "Ritual / Experimento", color: "#f15bb5" },
+            temporal: { label: "Conceito Temporal", color: "#b5179e" },
+            lugar: { label: "Lugar / Espaço", color: "#9b5de5" },
+            legado: { label: "Legado / Plano", color: "#83c5be" },
             other: { label: "Outros", color: "#cccccc" }
         };
 
@@ -390,23 +389,23 @@
         };
 
         const nodeDefaults = {
-            identity: { shape: "dot", size: 23, borderWidth: 2 },
-            elara:    { shape: "dot", size: 23, borderWidth: 2 },
-            arthur:   { shape: "dot", size: 21, borderWidth: 2 },
-            mara:     { shape: "dot", size: 21, borderWidth: 2 },
-            cult:     { shape: "icon", size: 18, iconCode: '\uf06e' },
-            ritual:   { shape: "icon", size: 18, iconCode: '\uf0d0' },
-            tech:     { shape: "icon", size: 17, iconCode: '\uf531' },
-            time:     { shape: "icon", size: 19, iconCode: '\uf1da' },
-            legacy:   { shape: "icon", size: 18, iconCode: '\uf556' },
-            other:    { shape: "dot", size: 16, borderWidth: 2 }
+            personagem: { shape: "dot", size: 23, borderWidth: 2 },
+            organizacao: { shape: "icon", size: 19, iconCode: '\uf0c0' },
+            evento: { shape: "icon", size: 18, iconCode: '\uf0a1' },
+            artefato: { shape: "icon", size: 18, iconCode: '\uf531' },
+            ritual: { shape: "icon", size: 18, iconCode: '\uf0d0' },
+            temporal: { shape: "icon", size: 19, iconCode: '\uf1da' },
+            lugar: { shape: "icon", size: 18, iconCode: '\uf3c5' },
+            legado: { shape: "icon", size: 18, iconCode: '\uf556' },
+            other: { shape: "dot", size: 16, borderWidth: 2 }
         };
 
         function node(id, label, group, title, overrides = {}) {
             const defaults = nodeDefaults[group] || nodeDefaults.other;
             const shape = overrides.shape || defaults.shape;
             const size = overrides.size || defaults.size;
-            const baseColor = overrides.color || groups[group].color;
+            const groupConfig = groups[group] || groups.other;
+            const baseColor = overrides.color || groupConfig.color;
 
             let nodeObj = {
                 id,
@@ -440,68 +439,68 @@
         }
 
         const nodesData = [
-            node("julian", "Julian", "identity", "Nome verdadeiro do personagem. É separado de Lorena e entregue ao circuito do governo/culto."),
-            node("lorena", "Lorena", "identity", "Mãe de Julian. Sua morte é o trauma que desperta o fogo e a primeira viagem temporal.", { size: 22 }),
-            node("kael_jovem", "Kael jovem", "identity", "Julian rebatizado pelo culto. Escapa da casa em chamas, infiltra-se na festa e é manipulado por Silas."),
-            node("silas", "Silas / Julian adulto", "identity", "Julian/Kael adulto usando identidade de agente infiltrado no culto. Manipula eventos e deixa o plano de contingência."),
+            node("julian", "Julian", "personagem", "Nome verdadeiro do personagem. É separado de Lorena e entregue ao circuito do governo/culto."),
+            node("lorena", "Lorena", "personagem", "Mãe de Julian. Sua morte é o trauma que desperta o fogo e a primeira viagem temporal.", { size: 22 }),
+            node("kael_jovem", "Kael jovem", "personagem", "Julian rebatizado pelo culto. Escapa da casa em chamas, infiltra-se na festa e é manipulado por Silas."),
+            node("silas", "Silas / Julian adulto", "personagem", "Julian/Kael adulto usando identidade de agente infiltrado no culto. Manipula eventos e deixa o plano de contingência."),
 
-            node("elara", "Elara", "elara", "Descobre as fitas, resiste ao ritual remoto, mata Arthur, quebra o ciclo e depois assume o fardo de Mara."),
-            node("hera", "Hera", "elara", "Versão velha/futura de Elara. Revela o núcleo frio e se sacrifica para empurrar Elara de volta ao laboratório."),
-            node("bia", "Bia", "other", "Amiga de Elara. Encontra a primeira fita e reaparece na cena final como símbolo da normalidade protegida."),
+            node("elara", "Elara", "personagem", "Descobre as fitas, resiste ao ritual remoto, mata Arthur, quebra o ciclo e depois assume o fardo de Mara."),
+            node("hera", "Hera", "personagem", "Versão velha/futura de Elara. Revela o núcleo frio e se sacrifica para empurrar Elara de volta ao laboratório."),
+            node("bia", "Bia", "personagem", "Amiga de Elara. Encontra a primeira fita e reaparece na cena final como símbolo da normalidade protegida."),
 
-            node("arthur", "Arthur Vane", "arthur", "Agente do governo e pai de Elara. Usa a epidemia falsa como pretexto e tenta apagar evidências biológicas."),
-            node("governo", "Governo / agentes", "arthur", "Rede operacional que trafica Julian, sustenta a quarentena e aciona forças militares.", { shape: "icon", iconCode: "\uf19c" }),
-            node("emma", "Emma", "arthur", "Esposa falecida de Arthur. Possível anjo/cobaia; seus objetos viram gatilhos psicológicos contra Arthur.", { size: 22 }),
+            node("arthur", "Arthur Vane", "personagem", "Agente do governo e pai de Elara. Usa a epidemia falsa como pretexto e tenta apagar evidências biológicas."),
+            node("governo", "Governo / agentes", "organizacao", "Rede operacional que trafica Julian, sustenta a quarentena e aciona forças militares.", { shape: "icon", iconCode: "\uf19c" }),
+            node("emma", "Emma", "personagem", "Esposa falecida de Arthur. Possível anjo/cobaia; seus objetos viram gatilhos psicológicos contra Arthur.", { size: 22 }),
 
-            node("mara", "Mara", "mara", "Sabota rádios, usa túneis do culto, manipula Arthur e Elara, mata Silas e tenta levar Kael ao Fogo Eterno.", { shape: "icon", iconCode: "\uf21b" }),
-            node("mara_proposito", "Mara com propósito", "legacy", "Identidade que Elara assume depois do selo: mito urbano e erro no sistema que caça o governo por anos.", { shape: "icon", iconCode: "\uf21b" }),
+            node("mara", "Mara", "personagem", "Sabota rádios, usa túneis do culto, manipula Arthur e Elara, mata Silas e tenta levar Kael ao Fogo Eterno.", { shape: "icon", iconCode: "\uf21b" }),
+            node("mara_proposito", "Mara com propósito", "personagem", "Identidade que Elara assume depois do selo: mito urbano e erro no sistema que caça o governo por anos.", { shape: "icon", iconCode: "\uf21b" }),
 
-            node("culto", "Culto", "cult", "Estrutura que sequestra Julian, rebatiza-o como Kael, realiza experimentos e opera túneis, rituais e sinalizadores."),
-            node("lideres_culto", "Líderes do Culto", "cult", "Alvos atraídos pela isca cronal de Elara e incinerados durante o plano de extermínio.", { shape: "icon", iconCode: "\uf0c0" }),
-            node("tuneis_culto", "Túneis do Culto", "cult", "Rede subterrânea usada por Mara para se deslocar e por Kael/Silas no reencontro final.", { shape: "icon", iconCode: "\uf6fc" }),
-            node("tunel_silas", "Reencontro no túnel", "cult", "Kael e Silas se encontram sob efeito das armas térmicas enquanto Mara arma a execução.", { shape: "icon", iconCode: "\uf08b" }),
+            node("culto", "Culto", "organizacao", "Estrutura que sequestra Julian, rebatiza-o como Kael, realiza experimentos e opera túneis, rituais e sinalizadores."),
+            node("lideres_culto", "Líderes do Culto", "organizacao", "Alvos atraídos pela isca cronal de Elara e incinerados durante o plano de extermínio.", { shape: "icon", iconCode: "\uf0c0" }),
+            node("tuneis_culto", "Túneis do Culto", "lugar", "Rede subterrânea usada por Mara para se deslocar e por Kael/Silas no reencontro final.", { shape: "icon", iconCode: "\uf6fc" }),
+            node("tunel_silas", "Reencontro no túnel", "lugar", "Kael e Silas se encontram sob efeito das armas térmicas enquanto Mara arma a execução.", { shape: "icon", iconCode: "\uf08b" }),
 
-            node("separacao_lorena", "Separação de Lorena", "ritual", "Julian é separado da mãe no centro de detenção e entregue aos agentes.", { shape: "icon", iconCode: "\uf127" }),
+            node("separacao_lorena", "Separação de Lorena", "evento", "Julian é separado da mãe no centro de detenção e entregue aos agentes.", { shape: "icon", iconCode: "\uf127" }),
             node("experimentos", "Experimentos em Kael", "ritual", "O culto tenta despertar poderes em Julian/Kael por meio de ritual e violência.", { shape: "icon", iconCode: "\uf0c3" }),
-            node("morte_lorena", "Morte de Lorena", "ritual", "Morte da mãe diante de Kael. Dispara o fogo e o primeiro salto temporal.", { shape: "icon", iconCode: "\uf714" }),
-            node("omega", "Frequência Ômega", "tech", "Sabotagem de rádio de Mara que causa náuseas coletivas e pânico público.", { shape: "icon", iconCode: "\uf519" }),
-            node("falsa_epidemia", "Falsa epidemia", "cult", "Narrativa pública criada pelo pânico da Frequência Ômega e usada como cobertura para a quarentena.", { shape: "icon", iconCode: "\uf0f1" }),
-            node("quarentena", "Quarentena", "arthur", "Pretexto de Arthur para isolamento, cerco e controle da casa de Elara.", { shape: "icon", iconCode: "\uf071" }),
-            node("predio_chips", "Prédio incendiado / chips", "mara", "Mara incendeia um prédio e deixa corpo com chips de agentes como rastro e provocação.", { shape: "icon", iconCode: "\uf1ad" }),
-            node("festa_elara", "Festa de Elara", "elara", "Ambiente onde Kael observa Elara e Bia, tentando se aproximar.", { shape: "icon", iconCode: "\uf79f" }),
-            node("hospital", "Hospital", "identity", "Flashback/paralelo em que Kael pesquisa rituais e recebe a visita de Silas.", { shape: "icon", iconCode: "\uf0f8" }),
-            node("fita1", "Fita Lua de Mel", "ritual", "Bia encontra a fita de Arthur e Emma; Elara descobre o primeiro nível do ritual.", { shape: "icon", iconCode: "\uf4db" }),
-            node("plano_vinganca", "Plano de Silas", "identity", "Silas orienta Kael a usar Elara para chegar até Arthur e admite que Mara observa tudo.", { shape: "icon", iconCode: "\uf0ca" }),
-            node("estase", "Esculturas de Estase", "mara", "Mortes encenadas por Mara como paródia das fitas VHS, usando objetos de Emma para destruir Arthur.", { shape: "icon", iconCode: "\uf544" }),
-            node("aviso_mara", "Aviso de Mara a Elara", "mara", "Mara antecipa que Kael se aproximará de Elara, contaminando a confiança entre eles.", { shape: "icon", iconCode: "\uf075" }),
-            node("fita2", "Fita FASE 2", "ritual", "Entregue pela portinha do gato. Elara e Kael passam mal e a ruptura emocional começa.", { shape: "icon", iconCode: "\uf4db" }),
-            node("ruptura", "Ruptura na festa", "elara", "Elara percebe ligação de Kael com o culto, expulsa convidados e o mantém sob mira de arma.", { shape: "icon", iconCode: "\uf127" }),
-            node("video_elara", "Vídeo de Elara dormindo", "mara", "Mara grava Elara dentro da casa e envia a Arthur, provocando pânico e cerco total.", { shape: "icon", iconCode: "\uf03d" }),
-            node("cerco", "Cerco militar", "arthur", "Polícia, exército, helicópteros e isolamento plástico cercam a casa como zona de contaminação.", { shape: "icon", iconCode: "\uf132" }),
-            node("arma_sonica", "Arma sônica", "tech", "Líquidos tremem, luz vermelha invade a casa, todos desmaiam e a energia acaba.", { shape: "icon", iconCode: "\uf028" }),
+            node("morte_lorena", "Morte de Lorena", "evento", "Morte da mãe diante de Kael. Dispara o fogo e o primeiro salto temporal.", { shape: "icon", iconCode: "\uf714" }),
+            node("omega", "Frequência Ômega", "artefato", "Sabotagem de rádio de Mara que causa náuseas coletivas e pânico público.", { shape: "icon", iconCode: "\uf519" }),
+            node("falsa_epidemia", "Falsa epidemia", "evento", "Narrativa pública criada pelo pânico da Frequência Ômega e usada como cobertura para a quarentena.", { shape: "icon", iconCode: "\uf0f1" }),
+            node("quarentena", "Quarentena", "evento", "Pretexto de Arthur para isolamento, cerco e controle da casa de Elara.", { shape: "icon", iconCode: "\uf071" }),
+            node("predio_chips", "Prédio incendiado / chips", "evento", "Mara incendeia um prédio e deixa corpo com chips de agentes como rastro e provocação.", { shape: "icon", iconCode: "\uf1ad" }),
+            node("festa_elara", "Festa de Elara", "evento", "Ambiente onde Kael observa Elara e Bia, tentando se aproximar.", { shape: "icon", iconCode: "\uf79f" }),
+            node("hospital", "Hospital", "lugar", "Flashback/paralelo em que Kael pesquisa rituais e recebe a visita de Silas.", { shape: "icon", iconCode: "\uf0f8" }),
+            node("fita1", "Fita Lua de Mel", "artefato", "Bia encontra a fita de Arthur e Emma; Elara descobre o primeiro nível do ritual.", { shape: "icon", iconCode: "\uf4db" }),
+            node("plano_vinganca", "Plano de Silas", "evento", "Silas orienta Kael a usar Elara para chegar até Arthur e admite que Mara observa tudo.", { shape: "icon", iconCode: "\uf0ca" }),
+            node("estase", "Esculturas de Estase", "evento", "Mortes encenadas por Mara como paródia das fitas VHS, usando objetos de Emma para destruir Arthur.", { shape: "icon", iconCode: "\uf544" }),
+            node("aviso_mara", "Aviso de Mara a Elara", "evento", "Mara antecipa que Kael se aproximará de Elara, contaminando a confiança entre eles.", { shape: "icon", iconCode: "\uf075" }),
+            node("fita2", "Fita FASE 2", "artefato", "Entregue pela portinha do gato. Elara e Kael passam mal e a ruptura emocional começa.", { shape: "icon", iconCode: "\uf4db" }),
+            node("ruptura", "Ruptura na festa", "evento", "Elara percebe ligação de Kael com o culto, expulsa convidados e o mantém sob mira de arma.", { shape: "icon", iconCode: "\uf127" }),
+            node("video_elara", "Vídeo de Elara dormindo", "evento", "Mara grava Elara dentro da casa e envia a Arthur, provocando pânico e cerco total.", { shape: "icon", iconCode: "\uf03d" }),
+            node("cerco", "Cerco militar", "evento", "Polícia, exército, helicópteros e isolamento plástico cercam a casa como zona de contaminação.", { shape: "icon", iconCode: "\uf132" }),
+            node("arma_sonica", "Arma sônica", "artefato", "Líquidos tremem, luz vermelha invade a casa, todos desmaiam e a energia acaba.", { shape: "icon", iconCode: "\uf028" }),
             node("ritual_remoto", "Ritual remoto em Elara", "ritual", "Elara flutua em transe diante de feixe laranja e nomes projetados por microfones.", { shape: "icon", iconCode: "\uf028" }),
-            node("quarto_panico", "Quarto do pânico / saída", "tech", "Elara lembra da possível saída subterrânea escondida na casa.", { shape: "icon", iconCode: "\uf52b" }),
-            node("lab", "Laboratório subterrâneo", "cult", "Laboratório sob a casa de Elara. Ponto de controle das armas, rastreadores e bunker.", { shape: "icon", iconCode: "\uf0c3" }),
-            node("armas_ads", "Armas térmicas / ADS", "tech", "Energia de calor direcionada usada no cerco, derretendo plástico e bloqueando saídas.", { shape: "icon", iconCode: "\uf76b" }),
-            node("incendio_invisivel", "Incêndio invisível", "tech", "Calor letal no ar, sem chama aparente, que transforma a casa em zona de morte.", { shape: "icon", iconCode: "\uf06d" }),
-            node("nucleo_frio", "Núcleo frio", "tech", "Área resfriada por nitrogênio que Hera revela ser o único refúgio seguro.", { shape: "icon", iconCode: "\uf769" }),
-            node("bunker_arthur", "Bunker de Arthur", "arthur", "Câmara blindada e isolada onde Arthur assiste à limpeza militar achando-se intocável.", { shape: "icon", iconCode: "\uf132" }),
-            node("morte_arthur", "Morte de Arthur", "arthur", "Elara inverte o sistema de resfriamento e redireciona o calor para a câmara de Arthur.", { shape: "icon", iconCode: "\uf714" }),
-            node("morte_silas", "Morte de Silas", "mara", "Mara atira no peito de Silas diante de Kael, ativando o plano de contingência dele.", { shape: "icon", iconCode: "\uf714" }),
-            node("fogo_eterno", "Fogo Eterno", "time", "Local onde Mara tenta levar Kael para apagar a existência dele e purificar a linha.", { shape: "icon", iconCode: "\uf06d" }),
-            node("quebra", "Quebra do ciclo", "time", "Elara atira em Mara e depois em Kael antes da entrada no Fogo Eterno.", { shape: "icon", iconCode: "\uf127" }),
+            node("quarto_panico", "Quarto do pânico / saída", "lugar", "Elara lembra da possível saída subterrânea escondida na casa.", { shape: "icon", iconCode: "\uf52b" }),
+            node("lab", "Laboratório subterrâneo", "lugar", "Laboratório sob a casa de Elara. Ponto de controle das armas, rastreadores e bunker.", { shape: "icon", iconCode: "\uf0c3" }),
+            node("armas_ads", "Armas térmicas / ADS", "artefato", "Energia de calor direcionada usada no cerco, derretendo plástico e bloqueando saídas.", { shape: "icon", iconCode: "\uf76b" }),
+            node("incendio_invisivel", "Incêndio invisível", "evento", "Calor letal no ar, sem chama aparente, que transforma a casa em zona de morte.", { shape: "icon", iconCode: "\uf06d" }),
+            node("nucleo_frio", "Núcleo frio", "artefato", "Área resfriada por nitrogênio que Hera revela ser o único refúgio seguro.", { shape: "icon", iconCode: "\uf769" }),
+            node("bunker_arthur", "Bunker de Arthur", "lugar", "Câmara blindada e isolada onde Arthur assiste à limpeza militar achando-se intocável.", { shape: "icon", iconCode: "\uf132" }),
+            node("morte_arthur", "Morte de Arthur", "evento", "Elara inverte o sistema de resfriamento e redireciona o calor para a câmara de Arthur.", { shape: "icon", iconCode: "\uf714" }),
+            node("morte_silas", "Morte de Silas", "evento", "Mara atira no peito de Silas diante de Kael, ativando o plano de contingência dele.", { shape: "icon", iconCode: "\uf714" }),
+            node("fogo_eterno", "Fogo Eterno", "temporal", "Local onde Mara tenta levar Kael para apagar a existência dele e purificar a linha.", { shape: "icon", iconCode: "\uf06d" }),
+            node("quebra", "Quebra do ciclo", "evento", "Elara atira em Mara e depois em Kael antes da entrada no Fogo Eterno.", { shape: "icon", iconCode: "\uf127" }),
 
-            node("primeira_viagem", "Primeira viagem temporal", "time", "Kael viaja para o passado após a morte de Lorena, tentando impedir Arthur.", { shape: "icon", iconCode: "\uf2f1" }),
-            node("loop_silas", "Loop de Silas", "time", "Silas reinicia no momento da morte de Lorena após matar Arthur em outra linha.", { shape: "icon", iconCode: "\uf1da" }),
-            node("casa_campo", "Casa de campo em chamas", "time", "Local recorrente onde linhas se cruzam e Silas encontra Elara/Hera saindo das chamas.", { shape: "icon", iconCode: "\uf015" }),
-            node("linhas_independentes", "Linhas independentes", "time", "Regra percebida por Silas: linhas coexistem e se cruzam, sem apagar totalmente umas às outras.", { shape: "icon", iconCode: "\uf074" }),
+            node("primeira_viagem", "Primeira viagem temporal", "temporal", "Kael viaja para o passado após a morte de Lorena, tentando impedir Arthur.", { shape: "icon", iconCode: "\uf2f1" }),
+            node("loop_silas", "Loop de Silas", "temporal", "Silas reinicia no momento da morte de Lorena após matar Arthur em outra linha.", { shape: "icon", iconCode: "\uf1da" }),
+            node("casa_campo", "Casa de campo em chamas", "lugar", "Local recorrente onde linhas se cruzam e Silas encontra Elara/Hera saindo das chamas.", { shape: "icon", iconCode: "\uf015" }),
+            node("linhas_independentes", "Linhas independentes", "temporal", "Regra percebida por Silas: linhas coexistem e se cruzam, sem apagar totalmente umas às outras.", { shape: "icon", iconCode: "\uf074" }),
 
-            node("mapa_ossos", "Mapa no centro", "legacy", "Mensagem no corpo de Silas leva Elara aos códigos gravados no esqueleto.", { shape: "icon", iconCode: "\uf279" }),
-            node("bio", "Bio-transmissor", "legacy", "Vértebra sintética contendo banco de dados roubado da rede mundial do culto.", { shape: "icon", iconCode: "\uf5d7" }),
-            node("tv_anos90", "TV dos anos 90", "tech", "Objeto de família que vira interface para acessar a rede do culto pelo bio-transmissor.", { shape: "icon", iconCode: "\uf26c" }),
-            node("isca_cronal", "Isca cronal", "legacy", "Elara hackeia sinalizadores e cria incêndios de baixa intensidade para atrair líderes do culto.", { shape: "icon", iconCode: "\uf0a1" }),
-            node("selo", "Selo dimensional", "legacy", "Pulso final que estica a realidade e sela esta dimensão contra novos viajantes temporais.", { shape: "icon", iconCode: "\uf023" }),
-            node("bar_final", "Bar com Bia", "other", "Anos depois, a TV está sem estática. Elara venceu e protege uma normalidade à qual não pertence mais.", { shape: "icon", iconCode: "\uf000" })
+            node("mapa_ossos", "Mapa no centro", "artefato", "Mensagem no corpo de Silas leva Elara aos códigos gravados no esqueleto.", { shape: "icon", iconCode: "\uf279" }),
+            node("bio", "Bio-transmissor", "artefato", "Vértebra sintética contendo banco de dados roubado da rede mundial do culto.", { shape: "icon", iconCode: "\uf5d7" }),
+            node("tv_anos90", "TV dos anos 90", "artefato", "Objeto de família que vira interface para acessar a rede do culto pelo bio-transmissor.", { shape: "icon", iconCode: "\uf26c" }),
+            node("isca_cronal", "Isca cronal", "legado", "Elara hackeia sinalizadores e cria incêndios de baixa intensidade para atrair líderes do culto.", { shape: "icon", iconCode: "\uf0a1" }),
+            node("selo", "Selo dimensional", "temporal", "Pulso final que estica a realidade e sela esta dimensão contra novos viajantes temporais.", { shape: "icon", iconCode: "\uf023" }),
+            node("bar_final", "Bar com Bia", "lugar", "Anos depois, a TV está sem estática. Elara venceu e protege uma normalidade à qual não pertence mais.", { shape: "icon", iconCode: "\uf000" })
         ];
 
         const preferredPositions = {
