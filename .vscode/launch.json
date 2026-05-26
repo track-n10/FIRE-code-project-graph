@@ -5,11 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "editor-browser",
+            "type": "msedge",
             "request": "launch",
             "name": "Open grafo_v2.html",
-            "url": "file:///${workspaceFolder}/grafo_v2.html",
-            "webRoot": "${workspaceFolder}"
+            "file": "${workspaceFolder}/grafo_v2.html"
         }
     ]
 }

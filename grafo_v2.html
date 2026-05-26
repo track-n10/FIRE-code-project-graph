@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grafo Interativo - O Caos, o Ritual e o Selo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         * {
             margin: 0;
@@ -16,9 +18,9 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background: #111118;
+            background: #0f1015;
             color: #f0f0f0;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         }
 
         #header {
@@ -28,16 +30,17 @@
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
-            padding: 10px 18px;
-            background: #090a12;
+            padding: 12px 20px;
+            background: #151720;
             border-bottom: 1px solid #282b3a;
         }
 
         h1 {
-            font-size: 1.05rem;
-            letter-spacing: 0.04em;
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
             text-transform: uppercase;
-            color: #ffd08a;
+            color: #00f5d4;
         }
 
         .header-tools {
@@ -236,61 +239,84 @@
         if (!container || !filterGroup || !legend || !status) return;
 
         const groups = {
-            identity: { label: "Julian / Kael / Silas", color: "#ff6666" },
-            elara: { label: "Elara / Hera", color: "#66ccff" },
-            arthur: { label: "Arthur / Governo", color: "#ffaa44" },
-            mara: { label: "Mara", color: "#ff7a8a" },
-            cult: { label: "Culto / Sistema", color: "#88ff88" },
-            ritual: { label: "Ritual", color: "#54e0c2" },
-            tech: { label: "Tecnologia / Armas", color: "#ffd166" },
-            time: { label: "Linhas temporais", color: "#cc99ff" },
-            legacy: { label: "Legado / Selo", color: "#aab6c8" },
-            other: { label: "Outros", color: "#b8b8b8" }
+            identity: { label: "Julian / Kael / Silas", color: "#ff4d6d" },
+            elara: { label: "Elara / Hera", color: "#00f5d4" },
+            arthur: { label: "Arthur / Governo", color: "#fbb02d" },
+            mara: { label: "Mara", color: "#9b5de5" },
+            cult: { label: "Culto / Sistema", color: "#00bbf9" },
+            ritual: { label: "Ritual", color: "#f15bb5" },
+            tech: { label: "Tecnologia / Armas", color: "#fee440" },
+            time: { label: "Linhas temporais", color: "#b5179e" },
+            legacy: { label: "Legado / Selo", color: "#83c5be" },
+            other: { label: "Outros", color: "#cccccc" }
         };
 
         const relationTypes = {
-            identity: { label: "identidade", color: "#ff6666", dashes: [4, 4], width: 2.4 },
-            causality: { label: "causalidade", color: "#88ff88", width: 2 },
-            manipulation: { label: "manipulação", color: "#ff66aa", dashes: [3, 5], width: 2 },
-            ritual: { label: "ritual", color: "#54e0c2", width: 2 },
-            temporal: { label: "temporal", color: "#cc99ff", dashes: [8, 6], width: 2.4 },
-            tech: { label: "tecnologia/arma", color: "#ffd166", width: 2 },
-            legacy: { label: "legado", color: "#aab6c8", dashes: [6, 4], width: 2 },
-            sacrifice: { label: "sacrifício/motivação", color: "#66ccff", width: 2.2 },
-            opposition: { label: "oposição/morte", color: "#ff4d4d", width: 2.5 },
-            pursuit: { label: "perseguição/rastro", color: "#ffaa44", dashes: [2, 4], width: 1.8 }
+            identity: { label: "identidade", color: "#ff4d6d", dashes: [4, 4], width: 2.4 },
+            causality: { label: "causalidade", color: "rgba(255,255,255,0.4)", width: 2 },
+            manipulation: { label: "manipulação", color: "#9b5de5", dashes: [3, 5], width: 2.2 },
+            ritual: { label: "ritual", color: "#f15bb5", width: 2 },
+            temporal: { label: "temporal", color: "#b5179e", dashes: [8, 6], width: 2.4 },
+            tech: { label: "tecnologia/arma", color: "#fee440", width: 2 },
+            legacy: { label: "legado", color: "#83c5be", dashes: [6, 4], width: 2 },
+            sacrifice: { label: "sacrifício/motivação", color: "#00f5d4", width: 2.2 },
+            opposition: { label: "oposição/morte", color: "#ef233c", width: 2.5 },
+            pursuit: { label: "perseguição/rastro", color: "#fbb02d", dashes: [2, 4], width: 1.8 }
         };
 
         const nodeDefaults = {
-            identity: { shape: "dot", size: 28 },
-            elara: { shape: "dot", size: 28 },
-            arthur: { shape: "dot", size: 26 },
-            mara: { shape: "dot", size: 26 },
-            cult: { shape: "box", size: 22 },
-            ritual: { shape: "diamond", size: 22 },
-            tech: { shape: "box", size: 21 },
-            time: { shape: "diamond", size: 24 },
-            legacy: { shape: "box", size: 22 },
-            other: { shape: "dot", size: 20 }
+            identity: { shape: "dot", size: 30, borderWidth: 3 },
+            elara:    { shape: "dot", size: 30, borderWidth: 3 },
+            arthur:   { shape: "dot", size: 28, borderWidth: 3 },
+            mara:     { shape: "dot", size: 28, borderWidth: 3 },
+            cult:     { shape: "icon", size: 24, iconCode: '\uf06e' },
+            ritual:   { shape: "icon", size: 24, iconCode: '\uf0d0' },
+            tech:     { shape: "icon", size: 22, iconCode: '\uf531' },
+            time:     { shape: "icon", size: 26, iconCode: '\uf1da' },
+            legacy:   { shape: "icon", size: 24, iconCode: '\uf556' },
+            other:    { shape: "dot", size: 20, borderWidth: 2 }
         };
 
         function node(id, label, group, title, overrides = {}) {
             const defaults = nodeDefaults[group] || nodeDefaults.other;
-            return {
+            const shape = overrides.shape || defaults.shape;
+            const size = overrides.size || defaults.size;
+            const baseColor = overrides.color || groups[group].color;
+
+            let nodeObj = {
                 id,
                 label,
                 group,
                 type: group,
-                shape: overrides.shape || defaults.shape,
-                size: overrides.size || defaults.size,
-                color: overrides.color || groups[group].color,
-                title: `<b>${label}</b><br>${title}`
+                shape: shape,
+                size: size,
+                title: `<div style="font-family:'Inter',sans-serif; padding:5px;"><b>${label}</b><br><span style="color:#ddd">${title}</span></div>`
             };
+
+            if (shape === 'icon') {
+                const iconCode = overrides.iconCode || defaults.iconCode || '\uf111';
+                nodeObj.icon = {
+                    face: "'Font Awesome 6 Free'",
+                    code: iconCode,
+                    weight: "900",
+                    color: baseColor,
+                    size: size * 2
+                };
+            } else {
+                nodeObj.color = {
+                    background: '#151720',
+                    border: baseColor,
+                    highlight: { background: baseColor, border: '#ffffff' }
+                };
+                nodeObj.borderWidth = overrides.borderWidth || defaults.borderWidth || 2;
+            }
+
+            return nodeObj;
         }
 
         const nodesData = [
             node("julian", "Julian", "identity", "Nome verdadeiro do personagem. É separado de Lorena e entregue ao circuito do governo/culto."),
-            node("lorena", "Lorena", "identity", "Mãe de Julian. Sua morte é o trauma que desperta o fogo e a primeira viagem temporal.", { size: 20 }),
+            node("lorena", "Lorena", "identity", "Mãe de Julian. Sua morte é o trauma que desperta o fogo e a primeira viagem temporal.", { size: 22 }),
             node("kael_jovem", "Kael jovem", "identity", "Julian rebatizado pelo culto. Escapa da casa em chamas, infiltra-se na festa e é manipulado por Silas."),
             node("silas", "Silas / Julian adulto", "identity", "Julian/Kael adulto usando identidade de agente infiltrado no culto. Manipula eventos e deixa o plano de contingência."),
 
@@ -299,58 +325,58 @@
             node("bia", "Bia", "other", "Amiga de Elara. Encontra a primeira fita e reaparece na cena final como símbolo da normalidade protegida."),
 
             node("arthur", "Arthur Vane", "arthur", "Agente do governo e pai de Elara. Usa a epidemia falsa como pretexto e tenta apagar evidências biológicas."),
-            node("governo", "Governo / agentes", "arthur", "Rede operacional que trafica Julian, sustenta a quarentena e aciona forças militares.", { shape: "box", size: 22 }),
-            node("emma", "Emma", "arthur", "Esposa falecida de Arthur. Possível anjo/cobaia; seus objetos viram gatilhos psicológicos contra Arthur.", { size: 20 }),
+            node("governo", "Governo / agentes", "arthur", "Rede operacional que trafica Julian, sustenta a quarentena e aciona forças militares.", { shape: "icon", iconCode: "\uf19c" }),
+            node("emma", "Emma", "arthur", "Esposa falecida de Arthur. Possível anjo/cobaia; seus objetos viram gatilhos psicológicos contra Arthur.", { size: 22 }),
 
-            node("mara", "Mara", "mara", "Sabota rádios, usa túneis do culto, manipula Arthur e Elara, mata Silas e tenta levar Kael ao Fogo Eterno."),
-            node("mara_proposito", "Mara com propósito", "legacy", "Identidade que Elara assume depois do selo: mito urbano e erro no sistema que caça o governo por anos."),
+            node("mara", "Mara", "mara", "Sabota rádios, usa túneis do culto, manipula Arthur e Elara, mata Silas e tenta levar Kael ao Fogo Eterno.", { shape: "icon", iconCode: "\uf21b" }),
+            node("mara_proposito", "Mara com propósito", "legacy", "Identidade que Elara assume depois do selo: mito urbano e erro no sistema que caça o governo por anos.", { shape: "icon", iconCode: "\uf21b" }),
 
             node("culto", "Culto", "cult", "Estrutura que sequestra Julian, rebatiza-o como Kael, realiza experimentos e opera túneis, rituais e sinalizadores."),
-            node("lideres_culto", "Líderes do Culto", "cult", "Alvos atraídos pela isca cronal de Elara e incinerados durante o plano de extermínio."),
-            node("tuneis_culto", "Túneis do Culto", "cult", "Rede subterrânea usada por Mara para se deslocar e por Kael/Silas no reencontro final."),
-            node("tunel_silas", "Reencontro no túnel", "cult", "Kael e Silas se encontram sob efeito das armas térmicas enquanto Mara arma a execução.", { shape: "box", size: 22 }),
+            node("lideres_culto", "Líderes do Culto", "cult", "Alvos atraídos pela isca cronal de Elara e incinerados durante o plano de extermínio.", { shape: "icon", iconCode: "\uf0c0" }),
+            node("tuneis_culto", "Túneis do Culto", "cult", "Rede subterrânea usada por Mara para se deslocar e por Kael/Silas no reencontro final.", { shape: "icon", iconCode: "\uf6fc" }),
+            node("tunel_silas", "Reencontro no túnel", "cult", "Kael e Silas se encontram sob efeito das armas térmicas enquanto Mara arma a execução.", { shape: "icon", iconCode: "\uf08b" }),
 
-            node("separacao_lorena", "Separação de Lorena", "ritual", "Julian é separado da mãe no centro de detenção e entregue aos agentes.", { shape: "box" }),
-            node("experimentos", "Experimentos em Kael", "ritual", "O culto tenta despertar poderes em Julian/Kael por meio de ritual e violência."),
-            node("morte_lorena", "Morte de Lorena", "ritual", "Morte da mãe diante de Kael. Dispara o fogo e o primeiro salto temporal.", { shape: "triangle", color: "#ff8888", size: 24 }),
-            node("omega", "Frequência Ômega", "tech", "Sabotagem de rádio de Mara que causa náuseas coletivas e pânico público."),
-            node("falsa_epidemia", "Falsa epidemia", "cult", "Narrativa pública criada pelo pânico da Frequência Ômega e usada como cobertura para a quarentena."),
-            node("quarentena", "Quarentena", "arthur", "Pretexto de Arthur para isolamento, cerco e controle da casa de Elara.", { shape: "box", size: 22 }),
-            node("predio_chips", "Prédio incendiado / chips", "mara", "Mara incendeia um prédio e deixa corpo com chips de agentes como rastro e provocação.", { shape: "box", size: 22 }),
-            node("festa_elara", "Festa de Elara", "elara", "Ambiente onde Kael observa Elara e Bia, tentando se aproximar.", { shape: "box", size: 22 }),
-            node("hospital", "Hospital", "identity", "Flashback/paralelo em que Kael pesquisa rituais e recebe a visita de Silas.", { shape: "box", size: 22 }),
-            node("fita1", "Fita Lua de Mel", "ritual", "Bia encontra a fita de Arthur e Emma; Elara descobre o primeiro nível do ritual."),
-            node("plano_vinganca", "Plano de Silas", "identity", "Silas orienta Kael a usar Elara para chegar até Arthur e admite que Mara observa tudo.", { shape: "box", size: 22 }),
-            node("estase", "Esculturas de Estase", "mara", "Mortes encenadas por Mara como paródia das fitas VHS, usando objetos de Emma para destruir Arthur.", { shape: "box", size: 22 }),
-            node("aviso_mara", "Aviso de Mara a Elara", "mara", "Mara antecipa que Kael se aproximará de Elara, contaminando a confiança entre eles.", { shape: "box", size: 22 }),
-            node("fita2", "Fita FASE 2", "ritual", "Entregue pela portinha do gato. Elara e Kael passam mal e a ruptura emocional começa."),
-            node("ruptura", "Ruptura na festa", "elara", "Elara percebe ligação de Kael com o culto, expulsa convidados e o mantém sob mira de arma.", { shape: "star", color: "#ff88aa", size: 26 }),
-            node("video_elara", "Vídeo de Elara dormindo", "mara", "Mara grava Elara dentro da casa e envia a Arthur, provocando pânico e cerco total.", { shape: "box", size: 22 }),
-            node("cerco", "Cerco militar", "arthur", "Polícia, exército, helicópteros e isolamento plástico cercam a casa como zona de contaminação.", { shape: "box", size: 23 }),
-            node("arma_sonica", "Arma sônica", "tech", "Líquidos tremem, luz vermelha invade a casa, todos desmaiam e a energia acaba."),
-            node("ritual_remoto", "Ritual remoto em Elara", "ritual", "Elara flutua em transe diante de feixe laranja e nomes projetados por microfones."),
-            node("quarto_panico", "Quarto do pânico / saída", "tech", "Elara lembra da possível saída subterrânea escondida na casa.", { shape: "box", size: 20 }),
-            node("lab", "Laboratório subterrâneo", "cult", "Laboratório sob a casa de Elara. Ponto de controle das armas, rastreadores e bunker."),
-            node("armas_ads", "Armas térmicas / ADS", "tech", "Energia de calor direcionada usada no cerco, derretendo plástico e bloqueando saídas."),
-            node("incendio_invisivel", "Incêndio invisível", "tech", "Calor letal no ar, sem chama aparente, que transforma a casa em zona de morte."),
-            node("nucleo_frio", "Núcleo frio", "tech", "Área resfriada por nitrogênio que Hera revela ser o único refúgio seguro.", { shape: "box", size: 20 }),
-            node("bunker_arthur", "Bunker de Arthur", "arthur", "Câmara blindada e isolada onde Arthur assiste à limpeza militar achando-se intocável.", { shape: "box", size: 22 }),
-            node("morte_arthur", "Morte de Arthur", "arthur", "Elara inverte o sistema de resfriamento e redireciona o calor para a câmara de Arthur.", { shape: "triangle", color: "#ff8888", size: 25 }),
-            node("morte_silas", "Morte de Silas", "mara", "Mara atira no peito de Silas diante de Kael, ativando o plano de contingência dele.", { shape: "triangle", color: "#ff8888", size: 25 }),
-            node("fogo_eterno", "Fogo Eterno", "time", "Local onde Mara tenta levar Kael para apagar a existência dele e purificar a linha."),
-            node("quebra", "Quebra do ciclo", "time", "Elara atira em Mara e depois em Kael antes da entrada no Fogo Eterno.", { shape: "star", color: "#ff88aa", size: 28 }),
+            node("separacao_lorena", "Separação de Lorena", "ritual", "Julian é separado da mãe no centro de detenção e entregue aos agentes.", { shape: "icon", iconCode: "\uf127" }),
+            node("experimentos", "Experimentos em Kael", "ritual", "O culto tenta despertar poderes em Julian/Kael por meio de ritual e violência.", { shape: "icon", iconCode: "\uf0c3" }),
+            node("morte_lorena", "Morte de Lorena", "ritual", "Morte da mãe diante de Kael. Dispara o fogo e o primeiro salto temporal.", { shape: "icon", iconCode: "\uf714" }),
+            node("omega", "Frequência Ômega", "tech", "Sabotagem de rádio de Mara que causa náuseas coletivas e pânico público.", { shape: "icon", iconCode: "\uf519" }),
+            node("falsa_epidemia", "Falsa epidemia", "cult", "Narrativa pública criada pelo pânico da Frequência Ômega e usada como cobertura para a quarentena.", { shape: "icon", iconCode: "\uf0f1" }),
+            node("quarentena", "Quarentena", "arthur", "Pretexto de Arthur para isolamento, cerco e controle da casa de Elara.", { shape: "icon", iconCode: "\uf071" }),
+            node("predio_chips", "Prédio incendiado / chips", "mara", "Mara incendeia um prédio e deixa corpo com chips de agentes como rastro e provocação.", { shape: "icon", iconCode: "\uf1ad" }),
+            node("festa_elara", "Festa de Elara", "elara", "Ambiente onde Kael observa Elara e Bia, tentando se aproximar.", { shape: "icon", iconCode: "\uf79f" }),
+            node("hospital", "Hospital", "identity", "Flashback/paralelo em que Kael pesquisa rituais e recebe a visita de Silas.", { shape: "icon", iconCode: "\uf0f8" }),
+            node("fita1", "Fita Lua de Mel", "ritual", "Bia encontra a fita de Arthur e Emma; Elara descobre o primeiro nível do ritual.", { shape: "icon", iconCode: "\uf4db" }),
+            node("plano_vinganca", "Plano de Silas", "identity", "Silas orienta Kael a usar Elara para chegar até Arthur e admite que Mara observa tudo.", { shape: "icon", iconCode: "\uf0ca" }),
+            node("estase", "Esculturas de Estase", "mara", "Mortes encenadas por Mara como paródia das fitas VHS, usando objetos de Emma para destruir Arthur.", { shape: "icon", iconCode: "\uf544" }),
+            node("aviso_mara", "Aviso de Mara a Elara", "mara", "Mara antecipa que Kael se aproximará de Elara, contaminando a confiança entre eles.", { shape: "icon", iconCode: "\uf075" }),
+            node("fita2", "Fita FASE 2", "ritual", "Entregue pela portinha do gato. Elara e Kael passam mal e a ruptura emocional começa.", { shape: "icon", iconCode: "\uf4db" }),
+            node("ruptura", "Ruptura na festa", "elara", "Elara percebe ligação de Kael com o culto, expulsa convidados e o mantém sob mira de arma.", { shape: "icon", iconCode: "\uf127" }),
+            node("video_elara", "Vídeo de Elara dormindo", "mara", "Mara grava Elara dentro da casa e envia a Arthur, provocando pânico e cerco total.", { shape: "icon", iconCode: "\uf03d" }),
+            node("cerco", "Cerco militar", "arthur", "Polícia, exército, helicópteros e isolamento plástico cercam a casa como zona de contaminação.", { shape: "icon", iconCode: "\uf132" }),
+            node("arma_sonica", "Arma sônica", "tech", "Líquidos tremem, luz vermelha invade a casa, todos desmaiam e a energia acaba.", { shape: "icon", iconCode: "\uf028" }),
+            node("ritual_remoto", "Ritual remoto em Elara", "ritual", "Elara flutua em transe diante de feixe laranja e nomes projetados por microfones.", { shape: "icon", iconCode: "\uf028" }),
+            node("quarto_panico", "Quarto do pânico / saída", "tech", "Elara lembra da possível saída subterrânea escondida na casa.", { shape: "icon", iconCode: "\uf52b" }),
+            node("lab", "Laboratório subterrâneo", "cult", "Laboratório sob a casa de Elara. Ponto de controle das armas, rastreadores e bunker.", { shape: "icon", iconCode: "\uf0c3" }),
+            node("armas_ads", "Armas térmicas / ADS", "tech", "Energia de calor direcionada usada no cerco, derretendo plástico e bloqueando saídas.", { shape: "icon", iconCode: "\uf76b" }),
+            node("incendio_invisivel", "Incêndio invisível", "tech", "Calor letal no ar, sem chama aparente, que transforma a casa em zona de morte.", { shape: "icon", iconCode: "\uf06d" }),
+            node("nucleo_frio", "Núcleo frio", "tech", "Área resfriada por nitrogênio que Hera revela ser o único refúgio seguro.", { shape: "icon", iconCode: "\uf769" }),
+            node("bunker_arthur", "Bunker de Arthur", "arthur", "Câmara blindada e isolada onde Arthur assiste à limpeza militar achando-se intocável.", { shape: "icon", iconCode: "\uf132" }),
+            node("morte_arthur", "Morte de Arthur", "arthur", "Elara inverte o sistema de resfriamento e redireciona o calor para a câmara de Arthur.", { shape: "icon", iconCode: "\uf714" }),
+            node("morte_silas", "Morte de Silas", "mara", "Mara atira no peito de Silas diante de Kael, ativando o plano de contingência dele.", { shape: "icon", iconCode: "\uf714" }),
+            node("fogo_eterno", "Fogo Eterno", "time", "Local onde Mara tenta levar Kael para apagar a existência dele e purificar a linha.", { shape: "icon", iconCode: "\uf06d" }),
+            node("quebra", "Quebra do ciclo", "time", "Elara atira em Mara e depois em Kael antes da entrada no Fogo Eterno.", { shape: "icon", iconCode: "\uf127" }),
 
-            node("primeira_viagem", "Primeira viagem temporal", "time", "Kael viaja para o passado após a morte de Lorena, tentando impedir Arthur."),
-            node("loop_silas", "Loop de Silas", "time", "Silas reinicia no momento da morte de Lorena após matar Arthur em outra linha."),
-            node("casa_campo", "Casa de campo em chamas", "time", "Local recorrente onde linhas se cruzam e Silas encontra Elara/Hera saindo das chamas."),
-            node("linhas_independentes", "Linhas independentes", "time", "Regra percebida por Silas: linhas coexistem e se cruzam, sem apagar totalmente umas às outras."),
+            node("primeira_viagem", "Primeira viagem temporal", "time", "Kael viaja para o passado após a morte de Lorena, tentando impedir Arthur.", { shape: "icon", iconCode: "\uf2f1" }),
+            node("loop_silas", "Loop de Silas", "time", "Silas reinicia no momento da morte de Lorena após matar Arthur em outra linha.", { shape: "icon", iconCode: "\uf1da" }),
+            node("casa_campo", "Casa de campo em chamas", "time", "Local recorrente onde linhas se cruzam e Silas encontra Elara/Hera saindo das chamas.", { shape: "icon", iconCode: "\uf015" }),
+            node("linhas_independentes", "Linhas independentes", "time", "Regra percebida por Silas: linhas coexistem e se cruzam, sem apagar totalmente umas às outras.", { shape: "icon", iconCode: "\uf074" }),
 
-            node("mapa_ossos", "Mapa no centro", "legacy", "Mensagem no corpo de Silas leva Elara aos códigos gravados no esqueleto."),
-            node("bio", "Bio-transmissor", "legacy", "Vértebra sintética contendo banco de dados roubado da rede mundial do culto."),
-            node("tv_anos90", "TV dos anos 90", "tech", "Objeto de família que vira interface para acessar a rede do culto pelo bio-transmissor."),
-            node("isca_cronal", "Isca cronal", "legacy", "Elara hackeia sinalizadores e cria incêndios de baixa intensidade para atrair líderes do culto."),
-            node("selo", "Selo dimensional", "legacy", "Pulso final que estica a realidade e sela esta dimensão contra novos viajantes temporais."),
-            node("bar_final", "Bar com Bia", "other", "Anos depois, a TV está sem estática. Elara venceu e protege uma normalidade à qual não pertence mais.")
+            node("mapa_ossos", "Mapa no centro", "legacy", "Mensagem no corpo de Silas leva Elara aos códigos gravados no esqueleto.", { shape: "icon", iconCode: "\uf279" }),
+            node("bio", "Bio-transmissor", "legacy", "Vértebra sintética contendo banco de dados roubado da rede mundial do culto.", { shape: "icon", iconCode: "\uf5d7" }),
+            node("tv_anos90", "TV dos anos 90", "tech", "Objeto de família que vira interface para acessar a rede do culto pelo bio-transmissor.", { shape: "icon", iconCode: "\uf26c" }),
+            node("isca_cronal", "Isca cronal", "legacy", "Elara hackeia sinalizadores e cria incêndios de baixa intensidade para atrair líderes do culto.", { shape: "icon", iconCode: "\uf0a1" }),
+            node("selo", "Selo dimensional", "legacy", "Pulso final que estica a realidade e sela esta dimensão contra novos viajantes temporais.", { shape: "icon", iconCode: "\uf023" }),
+            node("bar_final", "Bar com Bia", "other", "Anos depois, a TV está sem estática. Elara venceu e protege uma normalidade à qual não pertence mais.", { shape: "icon", iconCode: "\uf000" })
         ];
 
         let edgeSeq = 0;
@@ -672,17 +698,18 @@
 
         const options = {
             nodes: {
-                font: { size: 12, color: "#ffffff", face: "Segoe UI", strokeWidth: 0 },
-                borderWidth: 1.5,
-                shadow: { enabled: true, color: "rgba(0,0,0,0.35)", size: 8 },
+                font: { size: 12, color: "#ffffff", face: "Inter, 'Segoe UI', sans-serif", strokeWidth: 0 },
+                borderWidth: 3,
+                shadow: { enabled: true, color: "rgba(0,0,0,0.6)", size: 10, x: 0, y: 3 },
                 margin: 8
             },
             edges: {
                 arrows: { to: { enabled: true, scaleFactor: 0.8 } },
-                smooth: { type: "dynamic", roundness: 0.35 },
-                font: { size: 9, color: "#eeeeee", align: "middle", strokeWidth: 0 },
-                color: { color: "#b0b0ff", highlight: "#ffcc88" },
-                selectionWidth: 2
+                smooth: { type: "continuous", roundness: 0.4 },
+                font: { size: 9, color: "#eeeeee", align: "middle", strokeWidth: 0, face: "Inter, sans-serif" },
+                color: { color: "rgba(180, 180, 220, 0.4)", highlight: "#ffffff" },
+                selectionWidth: 3,
+                shadow: { enabled: true, color: "rgba(0,0,0,0.5)", size: 5, x: 0, y: 2 }
             },
             physics: {
                 enabled: true,
@@ -742,11 +769,17 @@
 
         function restoreColors() {
             cacheOriginalColors();
-            nodes.update(Object.keys(originalNodeColors).map(id => ({ id, color: originalNodeColors[id] })));
+            nodes.update(Object.keys(originalNodeColors).map(id => ({
+                id,
+                color: originalNodeColors[id],
+                opacity: 1,
+                font: { color: "#ffffff" }
+            })));
             edges.update(Object.keys(originalEdgeColors).map(id => ({
                 id,
                 color: originalEdgeColors[id],
-                width: originalEdgeWidths[id]
+                width: originalEdgeWidths[id],
+                opacity: 1
             })));
         }
 
@@ -765,10 +798,29 @@
             const connectedNodes = network.getConnectedNodes(clickedNodeId);
             const plainTitle = clickedNode.title.replace(/<br>/g, " - ").replace(/<[^>]*>/g, "");
 
-            restoreColors();
-            nodes.update({ id: clickedNodeId, color: "#fff08a" });
-            connectedNodes.forEach(id => nodes.update({ id, color: "#ffcc66" }));
-            connectedEdges.forEach(id => edges.update({ id, color: { color: "#ffd08a", highlight: "#ffd08a" }, width: 3 }));
+            const allNodes = nodes.get();
+            const allEdges = edges.get();
+
+            const updatedNodes = allNodes.map(n => {
+                if (n.id === clickedNodeId) {
+                    return { id: n.id, opacity: 1, font: { color: "#ffffff" } };
+                } else if (connectedNodes.includes(n.id)) {
+                    return { id: n.id, opacity: 1, font: { color: "#eeeeee" } };
+                } else {
+                    return { id: n.id, opacity: 0.15, font: { color: "rgba(255,255,255,0.1)" } };
+                }
+            });
+
+            const updatedEdges = allEdges.map(e => {
+                if (connectedEdges.includes(e.id)) {
+                    return { id: e.id, opacity: 1, color: { color: "#ffffff", highlight: "#ffffff" }, width: 3 };
+                } else {
+                    return { id: e.id, opacity: 0.05 };
+                }
+            });
+
+            nodes.update(updatedNodes);
+            edges.update(updatedEdges);
 
             status.textContent = `${clickedNode.label}: ${plainTitle.substring(0, 180)}`;
         });
