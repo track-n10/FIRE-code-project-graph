@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linha do Tempo - O Caos, o Ritual e o Selo</title>
+    <title>Linha do Tempo - O Caos, o Ritual e o Selo (Edição Revisada)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* ========== ESTILOS (MANTIDOS E OTIMIZADOS) ========== */
         :root {
             --bg: #0d0f16;
             --panel: rgba(21, 24, 35, 0.82);
@@ -65,7 +66,6 @@
             padding: 16px 20px 14px;
             border-bottom: 1px solid var(--line);
             background: rgba(12, 14, 20, 0.82);
-            -webkit-backdrop-filter: blur(18px);
             backdrop-filter: blur(18px);
             box-shadow: 0 14px 42px rgba(0,0,0,0.24);
         }
@@ -183,7 +183,6 @@
             border-radius: 999px;
             background: rgba(8,10,15,0.72);
             box-shadow: 0 8px 22px rgba(0,0,0,0.18);
-            -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
         }
         .act-label strong { color: var(--cyan); font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
@@ -218,7 +217,6 @@
             box-shadow: inset 3px 0 0 var(--lane-color), 0 12px 24px rgba(0,0,0,0.18);
             border-radius: 16px;
             background: rgba(8,10,15,0.7);
-            -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
         }
         .lane-label strong { color: var(--lane-color); font-size: .82rem; }
@@ -235,7 +233,6 @@
             border-radius: 16px;
             background: rgba(15, 17, 25, 0.86);
             box-shadow: var(--shadow);
-            -webkit-backdrop-filter: blur(14px);
             backdrop-filter: blur(14px);
             transform: translate(-50%, -50%);
             transition: opacity .22s ease, transform .22s ease, border-color .22s ease, box-shadow .22s ease;
@@ -284,7 +281,6 @@
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 20px;
             background: rgba(9,11,16,0.68);
-            -webkit-backdrop-filter: blur(18px);
             backdrop-filter: blur(18px);
             box-shadow: var(--shadow);
         }
@@ -334,7 +330,6 @@
             border-radius: 24px;
             background: rgba(11,13,19,0.78);
             box-shadow: var(--shadow);
-            -webkit-backdrop-filter: blur(22px);
             backdrop-filter: blur(22px);
             transform: translateX(0);
             transition: opacity .25s ease, transform .25s ease;
@@ -381,7 +376,6 @@
             background: rgba(12,14,20,0.84);
             color: var(--muted);
             font-size: .72rem;
-            -webkit-backdrop-filter: blur(18px);
             backdrop-filter: blur(18px);
         }
         .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; }
@@ -402,9 +396,9 @@
 <div class="app-shell">
     <header class="topbar">
         <div>
-            <p class="eyebrow">Linha do tempo interativa</p>
+            <p class="eyebrow">Linha do tempo interativa (edição revisada)</p>
             <h1>O Caos, o Ritual e o Selo</h1>
-            <p class="subtitle">Arraste o canvas para navegar, use o zoom para atravessar os Atos e clique nos eventos para revelar conexões de causalidade, manipulação e paradoxo temporal.</p>
+            <p class="subtitle">Conexões causais corrigidas, eventos de transição adicionados e categorização aprimorada. Arraste o canvas, clique nos eventos e explore a teia narrativa.</p>
         </div>
         <div class="toolbar" aria-label="Controles da linha do tempo">
             <div class="search-wrap">
@@ -443,7 +437,7 @@
         <aside id="detailPanel" class="detail-panel empty">
             <p class="eyebrow">Painel narrativo</p>
             <h2>Selecione um ponto da história</h2>
-            <p>Passe o mouse para ver tooltips rápidos ou clique em um evento para destacar suas conexões diretas e ler o papel dramático dele na escaleta.</p>
+            <p>Clique em qualquer card para ver suas conexões diretas, funções dramáticas e impacto na trama.</p>
         </aside>
 
         <div id="tooltip" class="tooltip" role="tooltip"></div>
@@ -457,12 +451,14 @@
 
 <script>
 (function () {
+    // ==================== DEFINIÇÃO DE METADADOS ====================
     const lanes = [
         { id: "origem", label: "Origem", color: "#ff4d6d", hint: "feridas fundadoras" },
         { id: "personagens", label: "Personagens", color: "#00f5d4", hint: "Elara, Kael, Silas, Mara" },
         { id: "culto", label: "Culto", color: "#00bbf9", hint: "rituais, governo e cerco" },
         { id: "tempo", label: "Linhas Temporais", color: "#b5179e", hint: "loops, paradoxos e cruzamentos" },
-        { id: "legado", label: "Legado", color: "#83c5be", hint: "plano final e selo" }
+        { id: "legado", label: "Legado", color: "#83c5be", hint: "plano final e selo" },
+        { id: "entidade", label: "Entidade Coletiva", color: "#fee440", hint: "Culto, Governo, Sistema" } // NOVA FAIXA
     ];
 
     const acts = [
@@ -485,73 +481,107 @@
         opposition: { label: "oposição/morte", color: "#ff4d6d", dashed: false }
     };
 
+    // ==================== EVENTOS (COM NOVOS CAMPOS: type, tags, consequence) ====================
+    function ev(id, act, lane, title, summary, tags, consequence, type = "main_plot") {
+        return { id, act, lane, title, summary, tags, consequence, type };
+    }
+
     const events = [
-        ev("p_sep", "prologo", "origem", "Separação de Lorena", "Julian é separado da mãe em um centro de detenção e traficado por agentes ligados a Arthur.", ["Julian", "Lorena", "Arthur"], "A identidade original é arrancada antes mesmo do ritual."),
-        ev("p_culto", "prologo", "culto", "Rebatismo como Kael", "O culto transforma Julian em Kael e o submete a experimentos para despertar poderes.", ["Culto", "Kael"], "O sistema cria a peça que depois tentará controlar."),
-        ev("p_morte", "prologo", "origem", "Morte de Lorena", "Kael presencia a morte da mãe; o trauma acende o fogo e torna possível o primeiro salto temporal.", ["Lorena", "Kael"], "Trauma fundador do ciclo de fogo."),
-        ev("p_viagem", "prologo", "tempo", "Primeira viagem temporal", "Kael viaja ao passado para impedir Arthur e encontrar uma versão mais jovem de si mesmo.", ["Kael", "Arthur"], "O desejo de cura se converte em interferência cronológica."),
+        // PRÓLOGO
+        ev("p_sep", "prologo", "origem", "Separação de Lorena", "Julian é separado da mãe em um centro de detenção e traficado por agentes ligados a Arthur.", ["Julian", "Lorena", "Arthur"], "A identidade original é arrancada antes mesmo do ritual.", "flashback"),
+        ev("p_culto", "prologo", "culto", "Rebatismo como Kael", "O culto transforma Julian em Kael e o submete a experimentos para despertar poderes.", ["Culto", "Kael"], "O sistema cria a peça que depois tentará controlar.", "lore"),
+        ev("p_morte", "prologo", "origem", "Morte de Lorena", "Kael presencia a morte da mãe; o trauma acende o fogo e torna possível o primeiro salto temporal.", ["Lorena", "Kael"], "Trauma fundador do ciclo de fogo.", "flashback"),
+        ev("p_viagem", "prologo", "tempo", "Primeira viagem temporal", "Kael viaja ao passado para impedir Arthur e encontrar uma versão mais jovem de si mesmo.", ["Kael", "Arthur"], "O desejo de cura se converte em interferência cronológica.", "temporal"),
 
-        ev("a1_fuga", "ato1", "personagens", "A fuga da casa em chamas", "O jovem Kael escapa de uma casa de campo em chamas e encontra uma cidade tomada por pânico sanitário.", ["Kael"], "Entrada física do caos no presente da história."),
-        ev("a1_omega", "ato1", "culto", "Frequência Ômega", "Mara sabota transmissões de rádio, causando náuseas coletivas e pânico público.", ["Mara"], "A falsa epidemia nasce como arma psicológica."),
-        ev("a1_quarentena", "ato1", "culto", "Arthur declara quarentena", "Arthur Vane e Silas assumem a gestão da crise e a caça à suposta terrorista Mara.", ["Arthur", "Silas", "Mara"], "O governo converte medo em autorização para cercar e vigiar."),
-        ev("a1_rastro", "ato1", "culto", "Rastro de Mara", "Mara incendeia um prédio, deixa um corpo com chips de agentes e some pelos túneis secretos do culto.", ["Mara", "Governo", "Culto"], "Ela prova conhecer o ritual por ter sobrevivido a ele."),
-        ev("a1_festa", "ato1", "personagens", "Festa de Elara", "Elara recebe Bia e amigos em casa; a TV antiga aparece como lembrança de família.", ["Elara", "Bia"], "O cotidiano adolescente esconde o futuro dispositivo do selo."),
-        ev("a1_infiltra", "ato1", "personagens", "Kael se infiltra", "Kael entra pelos fundos da festa, observa Elara e tenta se misturar aos convidados.", ["Kael", "Elara"], "A aproximação afetiva começa contaminada por missão e mentira."),
-        ev("a1_hospital", "ato1", "tempo", "Hospital paralelo", "Durante a quarentena, Kael pesquisa rituais no celular de uma enfermeira e recebe a visita de Silas, seu eu adulto.", ["Kael", "Silas"], "A linha temporal dobra sobre o próprio protagonista."),
-        ev("a1_fita1", "ato1", "culto", "Primeira fita VHS", "Bia encontra a fita de Arthur e Emma; Elara assiste e descobre o primeiro nível do ritual.", ["Bia", "Elara", "Emma"], "A imagem doméstica vira portal para a violência ritual."),
+        // ATO 1
+        ev("a1_fuga", "ato1", "personagens", "A fuga da casa em chamas", "O jovem Kael escapa de uma casa de campo em chamas e encontra uma cidade tomada por pânico sanitário.", ["Kael"], "Entrada física do caos no presente da história.", "main_plot"),
+        ev("a1_omega", "ato1", "culto", "Frequência Ômega", "Mara sabota transmissões de rádio, causando náuseas coletivas e pânico público.", ["Mara"], "A falsa epidemia nasce como arma psicológica.", "main_plot"),
+        ev("a1_quarentena", "ato1", "culto", "Arthur declara quarentena", "Arthur Vane e Silas assumem a gestão da crise e a caça à suposta terrorista Mara.", ["Arthur", "Silas", "Mara"], "O governo converte medo em autorização para cercar e vigiar.", "main_plot"),
+        ev("a1_rastro", "ato1", "culto", "Rastro de Mara", "Mara incendeia um prédio, deixa um corpo com chips de agentes e some pelos túneis secretos do culto.", ["Mara", "Governo", "Culto"], "Ela prova conhecer o ritual por ter sobrevivido a ele.", "subplot"),
+        ev("a1_festa", "ato1", "personagens", "Festa de Elara", "Elara recebe Bia e amigos em casa; a TV antiga aparece como lembrança de família.", ["Elara", "Bia"], "O cotidiano adolescente esconde o futuro dispositivo do selo.", "character_dev"),
+        ev("a1_infiltra", "ato1", "personagens", "Kael se infiltra", "Kael entra pelos fundos da festa, observa Elara e tenta se misturar aos convidados.", ["Kael", "Elara"], "A aproximação afetiva começa contaminada por missão e mentira.", "main_plot"),
+        ev("a1_hospital", "ato1", "tempo", "Hospital paralelo", "Durante a quarentena, Kael pesquisa rituais no celular de uma enfermeira e recebe a visita de Silas, seu eu adulto.", ["Kael", "Silas"], "A linha temporal dobra sobre o próprio protagonista.", "temporal"),
+        ev("a1_fita1", "ato1", "culto", "Primeira fita VHS", "Bia encontra a fita de Arthur e Emma; Elara assiste e descobre o primeiro nível do ritual.", ["Bia", "Elara", "Emma"], "A imagem doméstica vira portal para a violência ritual.", "ritual"),
 
-        ev("a2_plano", "ato2", "personagens", "Plano de vingança de Silas", "Silas orienta Kael a usar Elara para chegar a Arthur e admite que Mara também observa os eventos.", ["Silas", "Kael", "Elara"], "Mentoria, manipulação e autopreservação se misturam."),
-        ev("a2_estase", "ato2", "culto", "Esculturas de Estase", "Mara encena mortes como paródias das fitas VHS e espalha objetos de Emma para quebrar Arthur.", ["Mara", "Arthur", "Emma"], "O terror psicológico perfura a fachada clínica de Arthur."),
-        ev("a2_aviso", "ato2", "personagens", "Aviso de Mara", "Mara antecipa a Elara que Kael tentará se aproximar, enquanto a prisão dela ganha os jornais.", ["Mara", "Elara", "Kael"], "A confiança entre Elara e Kael é sabotada antes de existir."),
-        ev("a2_fita2", "ato2", "culto", "Fita 2: FASE 2", "A segunda fita chega pela portinha do gato; Elara e Kael assistem e passam mal.", ["Elara", "Kael"], "O ritual deixa de ser registro e passa a agir sobre os corpos."),
-        ev("a2_ruptura", "ato2", "personagens", "Ruptura na festa", "Elara percebe a ligação de Kael com o culto, expulsa convidados e o mantém sob mira de arma.", ["Elara", "Kael"], "A casa deixa de ser festa e vira zona de ameaça íntima."),
-        ev("a2_video", "ato2", "culto", "Vídeo de Elara dormindo", "Mara envia a Arthur um vídeo gravado dentro da casa, provocando pânico e ordem de cerco total.", ["Mara", "Arthur", "Elara"], "A chantagem transforma proteção paterna em violência estatal."),
-        ev("a2_cerco", "ato2", "culto", "Cerco plástico e militar", "Polícia, exército e helicópteros isolam a casa como zona de contaminação.", ["Arthur", "Governo"], "A falsa epidemia ganha forma arquitetônica."),
-        ev("a2_sonica", "ato2", "culto", "Arma sônica", "Líquidos tremem, luz vermelha invade o ambiente e todos desmaiam quando a energia acaba.", ["Governo", "Elara", "Kael"], "A tecnologia prepara o ritual remoto."),
+        // ATO 2
+        ev("a2_plano", "ato2", "personagens", "Plano de vingança de Silas", "Silas orienta Kael a usar Elara para chegar a Arthur e admite que Mara também observa os eventos.", ["Silas", "Kael", "Elara"], "Mentoria, manipulação e autopreservação se misturam.", "manipulation"),
+        ev("a2_estase", "ato2", "culto", "Esculturas de Estase", "Mara encena mortes como paródias das fitas VHS e espalha objetos de Emma para quebrar Arthur.", ["Mara", "Arthur", "Emma"], "O terror psicológico perfura a fachada clínica de Arthur.", "ritual"),
+        ev("a2_aviso", "ato2", "personagens", "Aviso de Mara", "Mara antecipa a Elara que Kael tentará se aproximar, enquanto a prisão dela ganha os jornais.", ["Mara", "Elara", "Kael"], "A confiança entre Elara e Kael é sabotada antes de existir.", "manipulation"),
+        ev("a2_fita2", "ato2", "culto", "Fita 2: FASE 2", "A segunda fita chega pela portinha do gato; Elara e Kael assistem e passam mal.", ["Elara", "Kael"], "O ritual deixa de ser registro e passa a agir sobre os corpos.", "ritual"),
+        ev("a2_ruptura", "ato2", "personagens", "Ruptura na festa", "Elara percebe a ligação de Kael com o culto, expulsa convidados e o mantém sob mira de arma.", ["Elara", "Kael"], "A casa deixa de ser festa e vira zona de ameaça íntima.", "climax"),
+        ev("a2_video", "ato2", "culto", "Vídeo de Elara dormindo", "Mara envia a Arthur um vídeo gravado dentro da casa, provocando pânico e ordem de cerco total.", ["Mara", "Arthur", "Elara"], "A chantagem transforma proteção paterna em violência estatal.", "manipulation"),
+        ev("a2_cerco", "ato2", "culto", "Cerco plástico e militar", "Polícia, exército e helicópteros isolam a casa como zona de contaminação.", ["Arthur", "Governo"], "A falsa epidemia ganha forma arquitetônica.", "main_plot"),
+        ev("a2_sonica", "ato2", "culto", "Arma sônica", "Líquidos tremem, luz vermelha invade o ambiente e todos desmaiam quando a energia acaba.", ["Governo", "Elara", "Kael"], "A tecnologia prepara o ritual remoto.", "tech"),
 
-        ev("i_loop", "interludio", "tempo", "Loop de Silas", "Silas mata Arthur em outra linha, salva a filha dele e reinicia no momento da morte de Lorena.", ["Silas", "Arthur"], "A vitória local não encerra o mecanismo temporal."),
-        ev("i_casa", "interludio", "tempo", "Casa de campo recorrente", "Meses depois, Silas vê a casa pegar fogo novamente e encontra Elara saindo das chamas.", ["Silas", "Elara"], "O incêndio funciona como cruzamento entre dimensões."),
-        ev("i_hera", "interludio", "personagens", "Elara revela ser Hera", "Ela diz que matou Silas após matar Arthur e revela que seu nome verdadeiro é Hera.", ["Hera", "Silas"], "Duas memórias incompatíveis coexistem no mesmo espaço."),
-        ev("i_linhas", "interludio", "tempo", "Independência cronal", "Silas deduz que as linhas temporais são independentes: elas se cruzam, mas não se apagam automaticamente.", ["Silas"], "Regra dramática que torna o selo necessário."),
-        ev("i_prova", "interludio", "tempo", "Prova pelo fogo", "Silas corre para dentro do fogo e espera o incêndio repetir antes de encontrar outro eu.", ["Silas"], "A teoria vira método de navegação entre linhas."),
+        // INTERLÚDIO (Jornada de Silas)
+        ev("i_loop", "interludio", "tempo", "Loop de Silas", "Silas mata Arthur em outra linha, salva a filha dele e reinicia no momento da morte de Lorena.", ["Silas", "Arthur"], "A vitória local não encerra o mecanismo temporal.", "temporal"),
+        ev("i_casa", "interludio", "tempo", "Casa de campo recorrente", "Meses depois, Silas vê a casa pegar fogo novamente e encontra Elara saindo das chamas.", ["Silas", "Elara"], "O incêndio funciona como cruzamento entre dimensões.", "temporal"),
+        ev("i_hera", "interludio", "personagens", "Elara revela ser Hera", "Ela diz que matou Silas após matar Arthur e revela que seu nome verdadeiro é Hera.", ["Hera", "Silas"], "Duas memórias incompatíveis coexistem no mesmo espaço.", "temporal"),
+        ev("i_linhas", "interludio", "tempo", "Independência cronal", "Silas deduz que as linhas temporais são independentes: elas se cruzam, mas não se apagam automaticamente.", ["Silas"], "Regra dramática que torna o selo necessário.", "lore"),
+        ev("i_prova", "interludio", "tempo", "Prova pelo fogo", "Silas corre para dentro do fogo e espera o incêndio repetir antes de encontrar outro eu.", ["Silas"], "A teoria vira método de navegação entre linhas.", "temporal"),
 
-        ev("a3_transe", "ato3", "personagens", "Elara em transe", "Kael acorda após a arma sônica e vê Elara flutuando diante de luz laranja e nomes em microfones.", ["Kael", "Elara"], "O ritual remoto tenta iniciar Elara à distância."),
-        ev("a3_panico", "ato3", "personagens", "Quarto do pânico", "Elara lembra de uma possível saída subterrânea escondida na casa.", ["Elara", "Kael"], "A fuga desce para a anatomia secreta da casa."),
-        ev("a3_lab", "ato3", "culto", "Laboratório subterrâneo", "Elara e Kael encontram um laboratório nos corredores sob a casa.", ["Elara", "Kael", "Culto"], "O lar revela sua infraestrutura ritual e militar."),
-        ev("a3_separa", "ato3", "personagens", "Separação", "Elara e Kael se separam dentro dos túneis e laboratórios.", ["Elara", "Kael"], "A fragmentação abre espaço para emboscadas paralelas."),
-        ev("a3_tunel", "ato3", "tempo", "Reencontro no túnel", "Kael encontra Silas sob efeito das armas térmicas; Mara surge com Elara no telefone.", ["Kael", "Silas", "Mara"], "Passado, futuro e vingança ficam no mesmo corredor."),
-        ev("a3_desliga", "ato3", "culto", "Desligamento das armas", "Silas instrui Elara a desligar armas térmicas e rastreadores pelo laboratório.", ["Silas", "Elara"], "O perigo militar recua, mas a armadilha de Mara começa."),
-        ev("a3_morte_silas", "ato3", "personagens", "Execução de Silas", "Mara atira no peito de Silas diante de Kael e sequestra o jovem para a casa de campo.", ["Mara", "Silas", "Kael"], "A morte ativa o plano de contingência deixado no corpo."),
-        ev("a3_hera", "ato3", "tempo", "Encontro com Hera", "Elara encontra sua versão velha em um confronto psicológico devastador.", ["Elara", "Hera"], "A protagonista encara o custo futuro de sobreviver."),
-        ev("a3_ads", "ato3", "culto", "Incêndio invisível", "Armas ADS aquecem o ar, derretem o plástico da quarentena e bloqueiam as saídas.", ["Governo", "Arthur"], "Arthur tenta cozinhar a casa para apagar evidências."),
-        ev("a3_nucleo", "ato3", "legado", "Núcleo frio", "Hera revela que o laboratório resfriado por nitrogênio é o único refúgio e se sacrifica.", ["Hera", "Elara"], "O sacrifício empurra Elara de volta ao centro do sistema."),
-        ev("a3_arthur", "ato3", "personagens", "Morte de Arthur", "Elara inverte o resfriamento do bunker e redireciona a energia térmica para dentro da câmara do pai.", ["Elara", "Arthur"], "O criador morre dentro da própria pira tecnológica."),
-        ev("a3_fogo", "ato3", "tempo", "Fogo Eterno", "Mara tenta levar Kael para dentro do fogo para apagar a existência dele e purificar a linha.", ["Mara", "Kael"], "A solução de Mara perpetuaria a interferência temporal."),
-        ev("a3_quebra", "ato3", "tempo", "Quebra do ciclo", "Elara trai o plano de sua versão futura: atira em Mara e depois em Kael antes que entrem nas chamas.", ["Elara", "Mara", "Kael"], "A linha deixa de tentar corrigir o passado e passa a selar o presente."),
+        // ATO 3
+        ev("a3_transe", "ato3", "personagens", "Elara em transe", "Kael acorda após a arma sônica e vê Elara flutuando diante de luz laranja e nomes em microfones.", ["Kael", "Elara"], "O ritual remoto tenta iniciar Elara à distância.", "main_plot"),
+        ev("a3_panico", "ato3", "personagens", "Quarto do pânico", "Elara lembra de uma possível saída subterrânea escondida na casa.", ["Elara", "Kael"], "A fuga desce para a anatomia secreta da casa.", "main_plot"),
+        ev("a3_lab", "ato3", "culto", "Laboratório subterrâneo", "Elara e Kael encontram um laboratório nos corredores sob a casa.", ["Elara", "Kael", "Culto"], "O lar revela sua infraestrutura ritual e militar.", "lore"),
+        ev("a3_separa", "ato3", "personagens", "Separação", "Elara e Kael se separam dentro dos túneis e laboratórios.", ["Elara", "Kael"], "A fragmentação abre espaço para emboscadas paralelas.", "main_plot"),
+        ev("a3_tunel", "ato3", "tempo", "Reencontro no túnel", "Kael encontra Silas sob efeito das armas térmicas; Mara surge com Elara no telefone.", ["Kael", "Silas", "Mara"], "Passado, futuro e vingança ficam no mesmo corredor.", "climax"),
+        ev("a3_desliga", "ato3", "culto", "Desligamento das armas", "Silas instrui Elara a desligar armas térmicas e rastreadores pelo laboratório.", ["Silas", "Elara"], "O perigo militar recua, mas a armadilha de Mara começa.", "tech"),
+        ev("a3_morte_silas", "ato3", "personagens", "Execução de Silas", "Mara atira no peito de Silas diante de Kael e sequestra o jovem para a casa de campo. Silas murmura: 'Use meus ossos'.", ["Mara", "Silas", "Kael"], "A morte ativa o plano de contingência deixado no corpo.", "opposition"),
+        ev("a3_hera", "ato3", "tempo", "Encontro com Hera", "Elara encontra sua versão velha em um confronto psicológico devastador.", ["Elara", "Hera"], "A protagonista encara o custo futuro de sobreviver.", "character_dev"),
+        ev("a3_ads", "ato3", "culto", "Incêndio invisível", "Armas ADS aquecem o ar, derretem o plástico da quarentena e bloqueiam as saídas.", ["Governo", "Arthur"], "Arthur tenta cozinhar a casa para apagar evidências.", "tech"),
+        ev("a3_nucleo", "ato3", "legado", "Núcleo frio", "Hera revela que o laboratório resfriado por nitrogênio é o único refúgio e se sacrifica.", ["Hera", "Elara"], "O sacrifício empurra Elara de volta ao centro do sistema.", "legacy"),
+        ev("a3_decisao", "ato3", "personagens", "Elara decide agir", "Após ver Hera se sacrificar, Elara decide não confiar em mais ninguém e assume o controle.", ["Elara"], "Ela rompe com a passividade e vira agente ativo.", "character_dev"),
+        ev("a3_arthur", "ato3", "personagens", "Morte de Arthur", "Elara inverte o resfriamento do bunker e redireciona a energia térmica para dentro da câmara do pai.", ["Elara", "Arthur"], "O criador morre dentro da própria pira tecnológica.", "climax"),
+        ev("a3_fogo", "ato3", "tempo", "Fogo Eterno", "Mara tenta levar Kael para dentro do fogo para apagar a existência dele e purificar a linha.", ["Mara", "Kael"], "A solução de Mara perpetuaria a interferência temporal.", "temporal"),
+        ev("a3_quebra", "ato3", "tempo", "Quebra do ciclo", "Elara trai o plano de sua versão futura: atira em Mara e depois em Kael antes que entrem nas chamas.", ["Elara", "Mara", "Kael"], "A linha deixa de tentar corrigir o passado e passa a selar o presente.", "climax"),
 
-        ev("a4_mapa", "ato4", "legado", "Mapa no centro", "No corpo de Silas, Elara encontra a mensagem: o mapa está no centro.", ["Elara", "Silas"], "A carne morta de Silas vira arquivo e bússola."),
-        ev("a4_ossos", "ato4", "legado", "Arquivo osteo-digital", "Elara realiza uma incisão brutal e encontra códigos gravados a laser na caixa torácica e coluna.", ["Elara", "Silas"], "O horror corporal entrega a rede mundial do culto."),
-        ev("a4_bio", "ato4", "legado", "Bio-transmissor", "Uma vértebra sintética contém o banco de dados roubado e se conecta à TV dos anos 90.", ["TV", "Silas", "Culto"], "O objeto doméstico vira terminal de guerra."),
-        ev("a4_isca", "ato4", "legado", "Ponto de Extermínio", "Elara hackeia sinalizadores do culto e cria incêndios de baixa intensidade para atrair líderes.", ["Elara", "Culto"], "A Frequência Ômega é reaproveitada como isca cronal."),
-        ev("a4_selo", "ato4", "legado", "Selo dimensional", "Ao incinerar líderes do culto, Elara ativa um pulso que estica a realidade e sela a dimensão.", ["Elara", "Culto"], "A história deixa de buscar vingança e ganha contenção metafísica."),
-        ev("a4_mara", "ato4", "legado", "Mara com propósito", "Elara enterra Kael e Silas, assume o nome Mara e caça o governo como mito urbano.", ["Elara", "Mara"], "Ela herda o erro no sistema, agora com direção moral."),
+        // ATO 4
+        ev("a4_mapa", "ato4", "legado", "Mapa no centro", "No corpo de Silas, Elara encontra a mensagem: o mapa está no centro.", ["Elara", "Silas"], "A carne morta de Silas vira arquivo e bússola.", "legacy"),
+        ev("a4_ossos", "ato4", "legado", "Arquivo osteo-digital", "Elara realiza uma incisão brutal e encontra códigos gravados a laser na caixa torácica e coluna.", ["Elara", "Silas"], "O horror corporal entrega a rede mundial do culto.", "legacy"),
+        ev("a4_bio", "ato4", "legado", "Bio-transmissor", "Uma vértebra sintética contém o banco de dados roubado e se conecta à TV dos anos 90.", ["TV", "Silas", "Culto"], "O objeto doméstico vira terminal de guerra.", "tech"),
+        ev("a4_isca", "ato4", "legado", "Ponto de Extermínio", "Elara hackeia sinalizadores do culto e cria incêndios de baixa intensidade para atrair líderes.", ["Elara", "Culto"], "A Frequência Ômega é reaproveitada como isca cronal.", "manipulation"),
+        ev("a4_selo", "ato4", "legado", "Selo dimensional", "Ao incinerar líderes do culto, Elara ativa um pulso que estica a realidade e sela a dimensão.", ["Elara", "Culto"], "A história deixa de buscar vingança e ganha contenção metafísica.", "legacy"),
+        ev("a4_mara", "ato4", "legado", "Mara com propósito", "Elara enterra Kael e Silas, assume o nome Mara e caça o governo como mito urbano.", ["Elara", "Mara"], "Ela herda o erro no sistema, agora com direção moral.", "legacy"),
 
-        ev("f_salto", "final", "legado", "Salto temporal", "Anos depois, a falsa epidemia acabou e o culto desapareceu das notícias.", ["Elara"], "O mundo voltou ao normal porque alguém ficou fora dele."),
-        ev("f_bar", "final", "personagens", "Bar com Bia", "Elara, mais velha e marcada por queimadura, encontra Bia em uma conversa banal e geracional.", ["Elara", "Bia"], "A leveza de Bia mede o peso que Elara carrega em silêncio."),
-        ev("f_tv", "final", "legado", "TV sem estática", "A TV dos anos 90 permanece como guia e prova de que a dimensão foi selada.", ["Elara", "TV"], "O selo não apaga a memória; apenas impede novas invasões."),
+        // FINAL
+        ev("f_salto", "final", "legado", "Salto temporal", "Anos depois, a falsa epidemia acabou e o culto desapareceu das notícias.", ["Elara"], "O mundo voltou ao normal porque alguém ficou fora dele.", "character_dev"),
+        ev("f_bar", "final", "personagens", "Bar com Bia", "Elara, mais velha e marcada por queimadura, encontra Bia em uma conversa banal e geracional.", ["Elara", "Bia"], "A leveza de Bia mede o peso que Elara carrega em silêncio.", "character_dev"),
+        ev("f_tv", "final", "legado", "TV sem estática", "A TV dos anos 90 permanece como guia e prova de que a dimensão foi selada.", ["Elara", "TV"], "O selo não apaga a memória; apenas impede novas invasões.", "legacy"),
+
+        // NOVOS EVENTOS DE TRANSIÇÃO E ENTIDADE
+        ev("trans_ato1_2", "ato2", "entidade", "Fim do Ato 1 – Aproximação forçada", "O encontro entre Kael e Elara se torna inevitável; o jogo de manipulação começa.", ["Kael", "Elara"], "Transição entre a infiltração e o plano de Silas.", "transition"),
+        ev("trans_ato2_3", "ato3", "entidade", "Silêncio após a arma sônica", "O desmaio coletivo separa os personagens e os lança em diferentes níveis de consciência.", ["Elara", "Kael", "Governo"], "Prepara o terreno para o ritual remoto e a descida ao laboratório.", "transition"),
+        ev("entity_culto", "prologo", "entidade", "O Culto como sistema", "Entidade coletiva que controla rituais, agentes e a tecnologia de vigilância.", ["Culto", "Governo", "Arthur"], "Força estrutural que molda todas as ações dos personagens.", "lore")
     ];
 
+    // ==================== CONEXÕES (CORRIGIDAS E AMPLIADAS) ====================
+    function link(from, to, label, type) {
+        return { from, to, label, type };
+    }
+
     const connections = [
+        // PRÓLOGO
         link("p_sep", "p_culto", "tráfico alimenta o culto", "causality"),
         link("p_culto", "p_morte", "experimento culmina no trauma", "ritual"),
         link("p_morte", "p_viagem", "fogo desperta salto", "temporal"),
         link("p_viagem", "a1_hospital", "Kael encontra seu futuro", "temporal"),
+        link("entity_culto", "p_culto", "estrutura que cria Kael", "manipulation"),
+        link("entity_culto", "a1_omega", "financia sabotagem", "manipulation"),
+
+        // ATO 1 (correções)
+        link("a1_fuga", "a1_omega", "testemunha o pânico", "causality"),
+        link("a1_fuga", "a1_quarentena", "é capturado pela quarentena", "causality"),
+        link("a1_fuga", "a1_infiltra", "motiva infiltração", "causality"),
         link("a1_omega", "a1_quarentena", "pânico vira pretexto", "causality"),
         link("a1_quarentena", "a2_cerco", "controle escala", "causality"),
         link("a1_rastro", "a2_estase", "Mara encena o terror", "manipulation"),
         link("a1_festa", "a1_infiltra", "aproximação de Kael", "manipulation"),
+        link("a1_fita1", "a1_festa", "Elara assiste durante a festa", "ritual"),
         link("a1_fita1", "a2_fita2", "fase seguinte", "ritual"),
         link("a1_hospital", "a2_plano", "Silas orienta Kael", "temporal"),
+
+        // ATO 2
         link("a2_plano", "a1_infiltra", "usar Elara", "manipulation"),
         link("a2_estase", "a2_video", "Arthur entra em paranoia", "manipulation"),
         link("a2_aviso", "a2_ruptura", "confiança sabotada", "manipulation"),
@@ -559,35 +589,50 @@
         link("a2_video", "a2_cerco", "pânico paterno", "manipulation"),
         link("a2_cerco", "a2_sonica", "ataque tecnológico", "tech"),
         link("a2_sonica", "a3_transe", "abre ritual remoto", "ritual"),
-        link("a3_transe", "a3_panico", "busca saída", "causality"),
-        link("a3_panico", "a3_lab", "descida subterrânea", "causality"),
-        link("a3_lab", "a3_tunel", "rede conecta os duplos", "temporal"),
-        link("a3_tunel", "a3_desliga", "telefone guia Elara", "tech"),
-        link("a3_desliga", "a3_morte_silas", "fim do perigo militar", "manipulation"),
-        link("a3_morte_silas", "a4_mapa", "plano de contingência", "legacy"),
-        link("a3_ads", "a3_hera", "calor força revelação", "causality"),
-        link("a3_hera", "a3_nucleo", "sacrifício e refúgio", "legacy"),
-        link("a3_nucleo", "a3_arthur", "Elara retorna ao sistema", "causality"),
-        link("a3_lab", "a3_arthur", "controle do bunker", "tech"),
-        link("a3_morte_silas", "a3_fogo", "Mara leva Kael", "temporal"),
-        link("a3_fogo", "a3_quebra", "impedir apagamento", "temporal"),
-        link("a3_arthur", "a3_quebra", "fim do criador libera decisão", "opposition"),
+        link("trans_ato1_2", "a2_plano", "precede manipulação", "causality"),
+        link("a2_ruptura", "trans_ato2_3", "clímax da festa", "causality"),
+
+        // INTERLÚDIO
         link("i_loop", "i_casa", "incêndio reaparece", "temporal"),
         link("i_casa", "i_hera", "Hera sai das chamas", "temporal"),
         link("i_hera", "i_linhas", "prova viva", "temporal"),
         link("i_linhas", "i_prova", "teoria testada", "temporal"),
         link("i_linhas", "a3_quebra", "regra exige ruptura", "temporal"),
+
+        // ATO 3 (adições e correções)
+        link("a3_transe", "a3_panico", "busca saída", "causality"),
+        link("a3_panico", "a3_lab", "descida subterrânea", "causality"),
+        link("a3_lab", "a3_separa", "separam-se nos túneis", "causality"),
+        link("a3_separa", "a3_tunel", "caminhos se reencontram", "manipulation"),
+        link("a3_tunel", "a3_desliga", "telefone guia Elara", "tech"),
+        link("a3_desliga", "a3_morte_silas", "fim do perigo militar", "manipulation"),
+        link("a3_morte_silas", "a4_mapa", "plano de contingência", "legacy"),
+        link("a3_ads", "a3_hera", "calor força revelação", "causality"),
+        link("a3_hera", "a3_nucleo", "sacrifício e refúgio", "legacy"),
+        link("a3_nucleo", "a3_decisao", "inspirada pelo sacrifício", "causality"),
+        link("a3_decisao", "a3_arthur", "executa o plano", "opposition"),
+        link("a3_lab", "a3_arthur", "controle do bunker", "tech"),
+        link("a3_morte_silas", "a3_fogo", "Mara leva Kael", "temporal"),
+        link("a3_fogo", "a3_quebra", "impedir apagamento", "temporal"),
+        link("a3_arthur", "a3_quebra", "fim do criador libera decisão", "opposition"),
+        link("trans_ato2_3", "a3_transe", "ponte entre atos", "causality"),
+
+        // ATO 4
         link("a4_mapa", "a4_ossos", "mensagem leva aos códigos", "legacy"),
         link("a4_ossos", "a4_bio", "vértebra sintética", "legacy"),
         link("a4_bio", "a4_isca", "hackeia sinalizadores", "tech"),
         link("a4_isca", "a4_selo", "atrai líderes", "manipulation"),
         link("a4_selo", "a4_mara", "fardo assumido", "legacy"),
         link("a4_mara", "f_salto", "anos de caça", "legacy"),
+        link("entity_culto", "a4_selo", "alvo da contenção", "opposition"),
+
+        // FINAL
         link("f_salto", "f_bar", "normalidade estranha", "causality"),
         link("a4_bio", "f_tv", "TV como guia", "legacy"),
         link("a4_selo", "f_tv", "mundo sem estática", "legacy")
     ];
 
+    // ==================== LÓGICA DE RENDERIZAÇÃO (MANTIDA E OTIMIZADA) ====================
     const state = {
         scale: 0.78,
         x: 28,
@@ -624,14 +669,6 @@
         detailPanel: document.getElementById("detailPanel"),
         scaleReadout: document.getElementById("scaleReadout")
     };
-
-    function ev(id, act, lane, title, summary, tags, consequence) {
-        return { id, act, lane, title, summary, tags, consequence };
-    }
-
-    function link(from, to, label, type) {
-        return { from, to, label, type };
-    }
 
     function layout() {
         const actPadding = 170;
@@ -685,8 +722,8 @@
         dom.eventLayer.innerHTML = events.map(item => {
             const pos = state.positions.get(item.id);
             return `
-                <article class="event-card" data-id="${item.id}" data-lane="${item.lane}" style="left:${pos.x}px;top:${pos.y}px;--event-color:${laneColors[item.lane]}">
-                    <div class="meta"><span>${actNames[item.act]}</span><span>${lanes.find(l => l.id === item.lane).label}</span></div>
+                <article class="event-card" data-id="${item.id}" data-lane="${item.lane}" data-type="${item.type}" style="left:${pos.x}px;top:${pos.y}px;--event-color:${laneColors[item.lane]}">
+                    <div class="meta"><span>${actNames[item.act]}</span><span>${lanes.find(l => l.id === item.lane).label}</span><span>${item.type}</span></div>
                     <h3>${item.title}</h3>
                     <p>${item.summary}</p>
                     <span class="dot"></span>
@@ -715,6 +752,7 @@
         const paths = connections.map((item, index) => {
             const from = state.positions.get(item.from);
             const to = state.positions.get(item.to);
+            if (!from || !to) return "";
             const mid = Math.abs(to.x - from.x) * 0.36;
             const lift = (index % 2 === 0 ? -1 : 1) * Math.min(70, 18 + Math.abs(to.y - from.y) * 0.18);
             const c1 = `${from.x + mid},${from.y + lift}`;
@@ -807,7 +845,7 @@
         const outgoing = connections.filter(link => link.from === item.id);
         dom.detailPanel.classList.remove("empty");
         dom.detailPanel.innerHTML = `
-            <p class="eyebrow">${acts.find(a => a.id === item.act).label} · ${lanes.find(l => l.id === item.lane).label}</p>
+            <p class="eyebrow">${acts.find(a => a.id === item.act).label} · ${lanes.find(l => l.id === item.lane).label} · ${item.type}</p>
             <h2>${item.title}</h2>
             <p>${item.summary}</p>
             <p><strong>Função dramática:</strong> ${item.consequence}</p>
@@ -825,7 +863,9 @@
 
     function describeLink(item) {
         const otherId = state.selectedId === item.from ? item.to : item.from;
-        return `${relationTypes[item.type].label} com “${findEvent(otherId).title}” (${item.label})`;
+        const other = findEvent(otherId);
+        if (!other) return `${relationTypes[item.type].label} (evento ausente)`;
+        return `${relationTypes[item.type].label} com “${other.title}” (${item.label})`;
     }
 
     function clearSelection() {
@@ -833,11 +873,12 @@
         dom.eventLayer.querySelectorAll(".event-card").forEach(card => card.classList.remove("active"));
         dom.connections.querySelectorAll(".connection-path").forEach(path => path.classList.remove("focus"));
         dom.detailPanel.classList.add("empty");
-        dom.detailPanel.innerHTML = `<p class="eyebrow">Painel narrativo</p><h2>Selecione um ponto da história</h2><p>Passe o mouse para ver tooltips rápidos ou clique em um evento para destacar suas conexões diretas e ler o papel dramático dele na escaleta.</p>`;
+        dom.detailPanel.innerHTML = `<p class="eyebrow">Painel narrativo</p><h2>Selecione um ponto da história</h2><p>Clique em qualquer card para ver suas conexões diretas, funções dramáticas e impacto na trama.</p>`;
     }
 
     function centerEvent(id) {
         const pos = state.positions.get(id);
+        if (!pos) return;
         const rect = dom.viewport.getBoundingClientRect();
         state.x = rect.width / 2 - pos.x * state.scale;
         state.y = rect.height / 2 - pos.y * state.scale;
@@ -930,7 +971,7 @@
     }
 
     function showTooltip(item, evt) {
-        dom.tooltip.innerHTML = `<strong>${item.title}</strong><span>${item.summary}<br><br><b>Função:</b> ${item.consequence}</span>`;
+        dom.tooltip.innerHTML = `<strong>${item.title}</strong><span>${item.summary}<br><br><b>Função:</b> ${item.consequence}<br><b>Tipo:</b> ${item.type}</span>`;
         dom.tooltip.classList.add("visible");
         moveTooltip(evt);
     }
@@ -966,6 +1007,7 @@
         return Math.max(min, Math.min(max, value));
     }
 
+    // Inicialização
     layout();
     renderActsAndLanes();
     renderConnections();
@@ -975,6 +1017,105 @@
     installSearch();
     applyFilters();
     fitStory();
+    // ========== SCRIPT DE DETECÇÃO DE NÓS ÓRFÃOS (AUTOMÁTICO) ==========
+    function runOrphanDetection() {
+        // Coleta os IDs de todos os eventos que estão realmente renderizados
+        const eventCards = document.querySelectorAll('.event-card');
+        const allIds = new Set(Array.from(eventCards).map(card => card.dataset.id));
+        
+        // Coleta as arestas (conexões) do SVG
+        const paths = document.querySelectorAll('#connections .connection-path');
+        const referencedIds = new Set();
+        paths.forEach(path => {
+            const from = path.getAttribute('data-from');
+            const to = path.getAttribute('data-to');
+            if (from) referencedIds.add(from);
+            if (to) referencedIds.add(to);
+        });
+        
+        // 1. Órfãos (nenhuma conexão)
+        const orphans = Array.from(allIds).filter(id => !referencedIds.has(id));
+        
+        // 2. Eventos com apenas entrada ou apenas saída
+        const inDegree = new Map();
+        const outDegree = new Map();
+        paths.forEach(path => {
+            const from = path.getAttribute('data-from');
+            const to = path.getAttribute('data-to');
+            if (from) outDegree.set(from, (outDegree.get(from) || 0) + 1);
+            if (to) inDegree.set(to, (inDegree.get(to) || 0) + 1);
+        });
+        
+        const noCause = Array.from(allIds).filter(id => !inDegree.has(id) && referencedIds.has(id));
+        const noConsequence = Array.from(allIds).filter(id => !outDegree.has(id) && referencedIds.has(id));
+        
+        // Exibe no console
+        console.group('🔍 Detecção automática de eventos órfãos');
+        if (orphans.length === 0) {
+            console.log('✅ Nenhum evento órfão (sem conexões).');
+        } else {
+            console.warn(`⚠️ ${orphans.length} evento(s) órfão(s):`);
+            orphans.forEach(id => {
+                const card = document.querySelector(`.event-card[data-id="${id}"]`);
+                const title = card?.querySelector('h3')?.innerText || id;
+                console.log(`   • ${id} – "${title}"`);
+            });
+        }
+        
+        if (noCause.length === 0) {
+            console.log('✅ Nenhum evento sem causa (apenas destino).');
+        } else {
+            console.warn(`⚠️ ${noCause.length} evento(s) sem causa (recebem conexões mas não originam):`);
+            noCause.forEach(id => {
+                const card = document.querySelector(`.event-card[data-id="${id}"]`);
+                const title = card?.querySelector('h3')?.innerText || id;
+                console.log(`   • ${id} – "${title}"`);
+            });
+        }
+        
+        if (noConsequence.length === 0) {
+            console.log('✅ Nenhum evento sem consequência (apenas origem).');
+        } else {
+            console.warn(`⚠️ ${noConsequence.length} evento(s) sem consequência (originam mas não são destino):`);
+            noConsequence.forEach(id => {
+                const card = document.querySelector(`.event-card[data-id="${id}"]`);
+                const title = card?.querySelector('h3')?.innerText || id;
+                console.log(`   • ${id} – "${title}"`);
+            });
+        }
+        console.groupEnd();
+        
+        // (Opcional) Mostrar um badge na tela
+        let badge = document.getElementById('orphan-badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'orphan-badge';
+            badge.style.position = 'fixed';
+            badge.style.bottom = '12px';
+            badge.style.left = '12px';
+            badge.style.zIndex = '999';
+            badge.style.background = 'rgba(0,0,0,0.8)';
+            badge.style.color = '#ffaa66';
+            badge.style.padding = '6px 12px';
+            badge.style.borderRadius = '20px';
+            badge.style.fontSize = '11px';
+            badge.style.fontFamily = 'monospace';
+            badge.style.border = '1px solid #ffaa66';
+            badge.style.backdropFilter = 'blur(8px)';
+            badge.style.pointerEvents = 'none';
+            document.body.appendChild(badge);
+        }
+        if (orphans.length === 0 && noCause.length === 0 && noConsequence.length === 0) {
+            badge.innerHTML = '✅ Nenhum evento órfão detectado';
+            badge.style.color = '#88ff88';
+        } else {
+            badge.innerHTML = `⚠️ Órfãos:${orphans.length} | Sem causa:${noCause.length} | Sem consequência:${noConsequence.length}`;
+            badge.style.color = '#ffaa66';
+        }
+    }
+    
+    // Executa a detecção um pouco depois da timeline estar totalmente carregada
+    setTimeout(runOrphanDetection, 1000);   
 })();
 </script>
 </body>
